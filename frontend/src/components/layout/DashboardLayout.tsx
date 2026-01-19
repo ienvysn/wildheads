@@ -2,7 +2,6 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Heart,
   Menu,
   X,
   Bell,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "@/image/arogya.png";
 
 interface NavItem {
   label: string;
@@ -53,7 +53,7 @@ export const DashboardLayout = ({ children, navItems }: { children: ReactNode, n
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 h-16 border-b border-border bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-50 h-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="flex h-full items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <button
@@ -64,8 +64,8 @@ export const DashboardLayout = ({ children, navItems }: { children: ReactNode, n
             </button>
 
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
-                <Heart className="h-4 w-4 text-primary-foreground" />
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden">
+                <img src={logo} alt="Logo" className="h-full w-full object-contain" />
               </div>
               <span className="text-lg font-semibold text-foreground hidden sm:inline">{displayRole}</span>
             </Link>
@@ -107,7 +107,7 @@ export const DashboardLayout = ({ children, navItems }: { children: ReactNode, n
 
       <div className="flex">
         {/* Sidebar - Desktop */}
-        <aside className="hidden lg:flex w-64 flex-col fixed left-0 top-16 bottom-0 border-r border-border bg-sidebar">
+        <aside className="hidden lg:flex w-64 flex-col fixed left-0 top-20 bottom-0 border-r border-border bg-sidebar">
           <nav className="flex-1 p-4 space-y-1">
             {navItems.map((item) => (
               <Link
@@ -135,7 +135,7 @@ export const DashboardLayout = ({ children, navItems }: { children: ReactNode, n
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="lg:hidden fixed inset-0 top-16 bg-background/80 backdrop-blur-sm z-40"
+                className="lg:hidden fixed inset-0 top-20 bg-background/80 backdrop-blur-sm z-40"
                 onClick={() => setSidebarOpen(false)}
               />
               <motion.aside
@@ -143,7 +143,7 @@ export const DashboardLayout = ({ children, navItems }: { children: ReactNode, n
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="lg:hidden fixed left-0 top-16 bottom-0 w-64 border-r border-border bg-sidebar z-50"
+                className="lg:hidden fixed left-0 top-20 bottom-0 w-64 border-r border-border bg-sidebar z-50"
               >
                 <nav className="p-4 space-y-1">
                   {navItems.map((item) => (

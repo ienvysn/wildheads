@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Heart, ShieldCheck, Stethoscope, UserCog, User, Mail } from "lucide-react";
+import { ShieldCheck, Stethoscope, UserCog, User, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
+import logo from "@/image/arogya.png";
 
 import { useAuth, UserRole } from "@/context/AuthContext";
 
@@ -108,8 +109,8 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="h-20 w-20 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-6">
-              <Heart className="h-10 w-10 text-primary-foreground" />
+            <div className="h-20 w-20 rounded-3xl bg-white flex items-center justify-center mx-auto mb-6 shadow-2xl overflow-hidden p-2">
+              <img src={logo} alt="Arogya Logo" className=" mt-3 max-h-full max-w-full object-contain" />
             </div>
             <h1 className="text-4xl font-bold text-primary-foreground mb-4">Arogya</h1>
             <p className="text-primary-foreground/80 text-lg max-w-md">
@@ -131,8 +132,8 @@ const Login = () => {
         >
           <div className="lg:hidden flex items-center justify-center mb-8">
             <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-                <Heart className="h-5 w-5 text-primary-foreground" />
+              <div className="h-16 w-16 flex items-center justify-center overflow-hidden">
+                <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain" />
               </div>
               <span className="text-2xl font-bold text-foreground">Arogya</span>
             </div>

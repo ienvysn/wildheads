@@ -176,8 +176,7 @@ const Index = () => {
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  className="bg-white text-primary hover:bg-white/90 border-none"
                   onClick={() => navigate("/login")}
                 >
                   Staff Login

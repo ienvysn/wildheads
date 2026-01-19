@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import logo from "@/image/arogya.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +27,7 @@ export const Header = () => {
 
   const getDashboardRoute = () => {
     if (!user) return "/";
-    const roleRoutes = {
+    const roleRoutes: Record<string, string> = {
       admin: "/admin/dashboard",
       doctor: "/doctor/dashboard",
       nurse: "/nurse/dashboard",
@@ -45,10 +46,10 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-20 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
-            <Heart className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden">
+            <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain" />
           </div>
           <span className="text-xl font-semibold text-foreground">Aarogya</span>
         </Link>
@@ -134,8 +135,8 @@ export const Header = () => {
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" onClick={() => navigate("/login")}>
-                Login
+              <Button variant="ghost" className="text-foreground" onClick={() => navigate("/login")}>
+                Staff Login
               </Button>
               <Button onClick={() => navigate("/register")}>Patient Portal</Button>
             </>
@@ -236,12 +237,13 @@ export const Header = () => {
                 <div className="flex flex-col gap-2 pt-2 border-t border-border">
                   <Button
                     variant="ghost"
+                    className="text-foreground"
                     onClick={() => {
                       navigate("/login");
                       setIsMenuOpen(false);
                     }}
                   >
-                    Login
+                    Staff Login
                   </Button>
                   <Button
                     onClick={() => {
@@ -260,4 +262,3 @@ export const Header = () => {
     </header>
   );
 };
-

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, User, Sparkles } from "lucide-react";
+import logo from "@/image/arogya.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,8 +103,8 @@ export const HeroChat = () => {
         <Card className="w-full h-[500px] flex flex-col shadow-2xl border-primary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <CardHeader className="p-4 border-b bg-primary/5">
                 <CardTitle className="flex items-center gap-2 text-primary">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                        <Bot className="h-6 w-6" />
+                    <div className="h-9 w-9 overflow-hidden flex items-center justify-center">
+                        <img src={logo} alt="Logo" className="h-full w-full object-contain" />
                     </div>
                     <div>
                         <span className="block text-lg">Aarogya AI Assistant</span>
@@ -131,9 +132,9 @@ export const HeroChat = () => {
                                     className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
                                 >
                                     <div className={`flex gap-2 max-w-[80%] ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${message.sender === "user" ? "bg-primary text-primary-foreground" : ""
                                             }`}>
-                                            {message.sender === "user" ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4 text-primary" />}
+                                            {message.sender === "user" ? <User className="h-4 w-4" /> : <img src={logo} alt="Bot" className="h-full w-full object-contain" />}
                                         </div>
                                         <div className={`p-3 rounded-2xl text-sm ${message.sender === "user"
                                             ? "bg-primary text-primary-foreground rounded-tr-none"
@@ -153,8 +154,8 @@ export const HeroChat = () => {
                                 className="flex justify-start"
                             >
                                 <div className="flex gap-2 max-w-[80%]">
-                                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                                        <Bot className="h-4 w-4 text-muted-foreground" />
+                                    <div className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        <img src={logo} alt="Bot" className="h-full w-full object-contain" />
                                     </div>
                                     <div className="bg-muted/50 border border-border p-3 rounded-2xl rounded-tl-none flex items-center gap-1">
                                         <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>

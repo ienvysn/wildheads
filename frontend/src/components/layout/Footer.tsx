@@ -1,5 +1,6 @@
-import { Heart, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/image/arogya.png";
 
 export const Footer = () => {
   return (
@@ -9,8 +10,8 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <Heart className="h-5 w-5 text-primary-foreground" />
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden">
+                <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain" />
               </div>
               <span className="text-xl font-semibold">Aarogya</span>
             </Link>
@@ -35,7 +36,7 @@ export const Footer = () => {
               <Link to="/contact" className="text-sm text-muted-foreground hover:text-background transition-colors">
                 Contact
               </Link>
-              <Link to="/login" className="text-sm text-muted-foreground hover:text-background transition-colors">
+              <Link to="/login" className="text-sm text-muted-foreground hover:text-white transition-colors font-medium">
                 Staff Login
               </Link>
               <Link to="/register" className="text-sm text-muted-foreground hover:text-background transition-colors">
@@ -50,7 +51,7 @@ export const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>9812345678</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
@@ -58,7 +59,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>123 Healthcare Ave, Medical City</span>
+                <span>Dillibazar, Kathmandu</span>
               </div>
             </div>
           </div>

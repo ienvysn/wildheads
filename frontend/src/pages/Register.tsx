@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, User, Mail, Lock, Phone, Calendar, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
 import { authApi } from "@/services/api";
 import { usePatientStore } from "@/store";
+import logo from "@/image/arogya.png";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -118,21 +119,27 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 gradient-primary items-center justify-center p-12 relative overflow-hidden">
-        <div className="relative z-10 text-center">
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Left Banner */}
+      <div className="hidden lg:flex flex-col justify-center items-center gradient-primary text-primary-foreground p-12 relative overflow-hidden">
+        <div className="relative z-10 text-center max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="h-24 w-24 rounded-3xl bg-white flex items-center justify-center mx-auto mb-8 shadow-2xl overflow-hidden">
+              <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain object-center scale-125" />
+            </div>
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="h-20 w-20 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-6">
-              <Heart className="h-10 w-10 text-primary-foreground" />
-            </div>
-            <h1 className="text-4xl font-bold text-primary-foreground mb-4">Join Aarogya</h1>
-            <p className="text-primary-foreground/80 text-lg max-w-md">
-              Register now to access world-class healthcare services with AI-powered assistance.
+            <h1 className="text-4xl font-bold mb-4">Join Arogya Service</h1>
+            <p className="text-lg opacity-90">
+              Connect with the best healthcare ecosystem. Whether you are a patient seeking care, a doctor offering expertise, or a hospital managing operations.
             </p>
           </motion.div>
         </div>
@@ -140,21 +147,19 @@ const Register = () => {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Right Panel - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-background overflow-y-auto">
+      {/* Right Form Area */}
+      <div className="flex items-center justify-center p-6 bg-background overflow-y-auto">
         <motion.div
           className="w-full max-w-md"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="lg:hidden flex items-center justify-center mb-8">
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-                <Heart className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-2xl font-bold text-foreground">Aarogya</span>
+          <div className="lg:hidden flex items-center gap-2 justify-center mb-8">
+            <div className="h-16 w-16 flex items-center justify-center overflow-hidden">
+              <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain" />
             </div>
+            <span className="text-2xl font-bold">Aarogya</span>
           </div>
 
           <Card className="border-0 shadow-lg">

@@ -1,8 +1,28 @@
-venv/
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyc
-*.log
+venv/
+.venv
+env/
 db.sqlite3
-.DS_Store
+*.log
+
+# Environment
 .env
+
+# Frontend
+node_modules/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Other
 seclists/
