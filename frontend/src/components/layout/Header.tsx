@@ -59,24 +59,18 @@ export const Header = () => {
         {/* Desktop Navigation */}
         {isHomePage && (
           <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="#features"
+            <Link
+              to="/features"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Features
-            </a>
-            <a
-              href="#departments"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Departments
-            </a>
-            <a
-              href="#about"
+            </Link>
+            <Link
+              to="/about"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               About Us
-            </a>
+            </Link>
           </nav>
         )}
 
@@ -147,27 +141,20 @@ export const Header = () => {
             <nav className="container flex flex-col gap-4 py-4">
               {isHomePage && (
                 <>
-                  <a
-                    href="#features"
+                  <Link
+                    to="/features"
                     className="text-sm font-medium text-muted-foreground hover:text-foreground"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Features
-                  </a>
-                  <a
-                    href="#departments"
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Departments
-                  </a>
-                  <a
-                    href="#about"
+                  </Link>
+                  <Link
+                    to="/about"
                     className="text-sm font-medium text-muted-foreground hover:text-foreground"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     About Us
-                  </a>
+                  </Link>
                 </>
               )}
 

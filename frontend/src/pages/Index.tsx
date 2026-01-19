@@ -1,74 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import {
-  Calendar,
-  Clock,
-  Shield,
-  Stethoscope,
-  Heart,
-  Brain,
-  Baby,
-  Bone,
-  Eye,
-  Activity,
-  Users,
-  Award,
-  ChevronRight
-} from "lucide-react";
+import { Award, ChevronRight, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { HeroChat } from "@/components/home/HeroChat";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
   const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: Calendar,
-      title: "Easy Scheduling",
-      description: "Book appointments online in just a few clicks. Choose your preferred doctor and time slot."
-    },
-    {
-      icon: Clock,
-      title: "Real-time Updates",
-      description: "Get instant notifications about your appointments, test results, and prescriptions."
-    },
-    {
-      icon: Shield,
-      title: "Secure Records",
-      description: "Your medical records are encrypted and securely stored. Access them anytime, anywhere."
-    },
-    {
-      icon: Stethoscope,
-      title: "Expert Doctors",
-      description: "Our team of experienced specialists provides world-class healthcare services."
-    }
-  ];
-
-  const departments = [
-    { icon: Heart, name: "Cardiology", doctors: 8 },
-    { icon: Brain, name: "Neurology", doctors: 6 },
-    { icon: Baby, name: "Pediatrics", doctors: 10 },
-    { icon: Bone, name: "Orthopedics", doctors: 7 },
-    { icon: Eye, name: "Ophthalmology", doctors: 5 },
-    { icon: Activity, name: "Emergency", doctors: 12 },
-  ];
 
   const stats = [
     { value: "15+", label: "Years of Excellence" },
@@ -93,23 +33,23 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
                 <Award className="h-4 w-4" />
-                Trusted Healthcare Provider
+                AI-Powered Healthcare Management
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight text-balance">
                 Modern Healthcare at Your{" "}
                 <span className="text-primary">Fingertips</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl">
-                Experience seamless healthcare management with our integrated system.
+                Experience seamless healthcare management with our AI-integrated system.
                 Book appointments, access records, and connect with top specialists—all in one place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="shadow-primary" onClick={() => navigate("/register")}>
-                  Book Appointment
+                  Get Started
                   <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => navigate("/login")}>
-                  Patient Portal
+                  Sign In
                 </Button>
               </div>
             </motion.div>
@@ -151,8 +91,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20">
+      {/* Features Preview */}
+      <section className="py-20 bg-background">
         <div className="container">
           <motion.div
             className="text-center mb-12"
@@ -161,88 +101,56 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Why Choose Arogya?
+              Why Choose Aarogya?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We combine cutting-edge technology with compassionate care to deliver
-              the best healthcare experience for you and your family.
+              Advanced AI technology combined with compassionate care for the best healthcare experience.
             </p>
           </motion.div>
 
-          <motion.div
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {features.map((feature, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className="h-full border-0 shadow-md hover:shadow-lg transition-shadow">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {[
+              {
+                title: "AI Health Assistant",
+                description: "Get instant health guidance from our AI-powered assistant available 24/7.",
+              },
+              {
+                title: "Smart Appointments",
+                description: "Book and manage appointments with ease using our intelligent scheduling system.",
+              },
+              {
+                title: "Secure Records",
+                description: "Your medical data is encrypted and accessible only to you and your healthcare providers.",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
-                    <div className="h-12 w-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-                      <feature.icon className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
-          </motion.div>
-        </div>
-      </section>
+          </div>
 
-      {/* Departments Section */}
-      <section id="departments" className="py-20 bg-muted/50">
-        <div className="container">
-          <motion.div
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Our Departments
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive healthcare services across multiple specialties,
-              staffed by experienced professionals.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {departments.map((dept, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className="group cursor-pointer border-0 shadow-md hover:shadow-lg transition-all hover:-translate-y-1">
-                  <CardContent className="p-6 flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-xl bg-primary/10 group-hover:gradient-primary flex items-center justify-center transition-all">
-                      <dept.icon className="h-7 w-7 text-primary group-hover:text-primary-foreground transition-colors" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">{dept.name}</h3>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Users className="h-3.5 w-3.5" />
-                        {dept.doctors} Specialists
-                      </p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+          <div className="text-center">
+            <Button variant="outline" onClick={() => navigate("/features")}>
+              View All Features
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section id="about" className="py-20">
+      <section className="py-20 bg-muted/50">
         <div className="container">
           <motion.div
             className="relative rounded-3xl overflow-hidden gradient-primary p-12 lg:p-16 text-center"
@@ -255,7 +163,7 @@ const Index = () => {
                 Ready to Experience Better Healthcare?
               </h2>
               <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-                Join thousands of patients who trust Arogya for their healthcare needs.
+                Join thousands of patients who trust Aarogya for their healthcare needs.
                 Register today and take control of your health journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
