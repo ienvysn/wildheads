@@ -1,149 +1,221 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { StatCard } from "@/components/dashboard/StatCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity, Users, AlertCircle, CheckCircle, Clock, FileText } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  LayoutDashboard,
-  UserPlus,
-  Clock,
-  Activity,
-  Stethoscope,
-  ClipboardList,
-  User,
-  ChevronRight
-} from "lucide-react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
-const navItems = [
-  { label: "Dashboard", href: "/nurse/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "Register Patient", href: "/nurse/register", icon: <UserPlus className="h-5 w-5" /> },
-  { label: "Queue Management", href: "/nurse/queue", icon: <Clock className="h-5 w-5" /> },
-  { label: "Record Vitals", href: "/nurse/vitals", icon: <Activity className="h-5 w-5" /> },
-];
-
-import { patients } from "@/data/mockData";
-
-const NurseDashboard = () => {
+export default function NurseDashboard() {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleRecordVitals = (patientId: string) => {
-    navigate(`/nurse/patient/${patientId}`);
+  const stats = [
+    {
+      title: "Patients in Queue",
+      value: "8",
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      title: "Vitals Recorded",
+      value: "24",
+      icon: Activity,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      title: "Pending Tasks",
+      value: "5",
+      icon: AlertCircle,
+      color: "text-orange-600",
+      bgColor: "bg-orange-100",
+    },
+    {
+      title: "Completed Today",
+      value: "32",
+      icon: CheckCircle,
+      color: "text-purple-600",
+      bgColor: "bg-purple-100",
+    },
+  ];
+
+  const patientQueue = [
+    { id: 1, name: "John Doe", room: "101", status: "waiting", priority: "normal" },
+    { id: 2, name: "Jane Smith", room: "102", status: "in-progress", priority: "high" },
+    { id: 3, name: "Mike Johnson", room: "103", status: "waiting", priority: "normal" },
+    { id: 4, name: "Sarah Williams", room: "104", status: "waiting", priority: "urgent" },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "waiting":
+        return "bg-yellow-100 text-yellow-800";
+      case "in-progress":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "urgent":
+        return "bg-red-100 text-red-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
-    <DashboardLayout navItems={navItems}>
-      <motion.div
-        className="space-y-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Nurse Station</h1>
-          <p className="text-muted-foreground">Good morning, Mary. Here's your workflow for today.</p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid sm:grid-cols-3 gap-4">
-          <StatCard
-            title="Check-ins Today"
-            value="0"
-            icon={<UserPlus className="h-6 w-6" />}
-            variant="primary"
-          />
-          <StatCard
-            title="Pending Vitals"
-            value="0"
-            icon={<Activity className="h-6 w-6" />}
-            variant="warning"
-          />
-          <StatCard
-            title="Vitals Recorded"
-            value="0"
-            icon={<ClipboardList className="h-6 w-6" />}
-            variant="success"
-          />
-        </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <Button size="lg" className="h-auto py-6 flex-col gap-2">
-                <UserPlus className="h-8 w-8" />
-                <span>Register Walk-in Patient</span>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Nurse Dashboard</h1>
+              <p className="text-sm text-muted-foreground">
+                {user?.first_name || user?.username} {user?.last_name || ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                Home
               </Button>
-              <Button size="lg" variant="outline" className="h-auto py-6 flex-col gap-2">
-                <Activity className="h-8 w-8" />
-                <span>Record Vitals</span>
-              </Button>
-              <Button size="lg" variant="outline" className="h-auto py-6 flex-col gap-2">
-                <Clock className="h-8 w-8" />
-                <span>Manage Queue</span>
+              <Button variant="ghost" onClick={logout}>
+                Logout
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </header>
 
-        {/* Pending Vitals */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Activity className="h-5 w-5 text-warning" />
-              Patients Pending Vitals
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {patients.map((patient, i) => (
-              <div
-                key={patient.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
-                  <div>
-                    <p className="font-medium">{patient.name}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Stethoscope className="h-3.5 w-3.5" />
-                      <span>Dr. Smith's queue</span>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Patient Queue */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Patient Queue</CardTitle>
+              <CardDescription>Patients waiting for care</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {patientQueue.map((patient) => (
+                  <div key={patient.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium text-primary">
+                          {patient.name.split(" ").map((n) => n[0]).join("")}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{patient.name}</p>
+                        <p className="text-sm text-muted-foreground">Room {patient.room}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getPriorityColor(patient.priority)} variant="secondary">
+                        {patient.priority}
+                      </Badge>
+                      <Badge className={getStatusColor(patient.status)} variant="secondary">
+                        {patient.status}
+                      </Badge>
+                      <Button size="sm" variant="outline">
+                        Attend
+                      </Button>
                     </div>
                   </div>
-                </div>
-                <Button size="sm" onClick={() => handleRecordVitals(patient.id)}>
-                  View & Record
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+                ))}
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Doctor Queues Overview */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Stethoscope className="h-5 w-5 text-primary" />
-              Doctor Queue Status
-            </CardTitle>
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common nursing tasks</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button className="w-full justify-start" variant="outline">
+                <Activity className="mr-2 h-4 w-4" />
+                Record Vitals
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <FileText className="mr-2 h-4 w-4" />
+                Update Patient Notes
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Report Emergency
+              </Button>
+              <Button className="w-full justify-start" variant="outline">
+                <Clock className="mr-2 h-4 w-4" />
+                Medication Schedule
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Today's Tasks */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Today's Tasks</CardTitle>
+            <CardDescription>Scheduled tasks and reminders</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground text-center py-4">
-              No queue data available
+            <div className="space-y-4">
+              {[
+                { task: "Administer medication - Room 101", time: "10:00 AM", status: "pending" },
+                { task: "Check vitals - Room 102", time: "10:30 AM", status: "completed" },
+                { task: "Wound dressing - Room 103", time: "11:00 AM", status: "pending" },
+                { task: "Blood sample collection - Room 104", time: "11:30 AM", status: "pending" },
+              ].map((task, index) => (
+                <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2 w-2 rounded-full ${task.status === "completed" ? "bg-green-500" : "bg-orange-500"}`} />
+                    <div>
+                      <p className="font-medium">{task.task}</p>
+                      <p className="text-sm text-muted-foreground">{task.time}</p>
+                    </div>
+                  </div>
+                  {task.status === "pending" && (
+                    <Button size="sm" variant="outline">
+                      Mark Done
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </DashboardLayout>
+      </main>
+    </div>
   );
-};
-
-export default NurseDashboard;
+}

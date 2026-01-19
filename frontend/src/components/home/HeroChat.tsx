@@ -17,7 +17,7 @@ export const HeroChat = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
-            text: "Hello! I'm your Arogya AI Assistant. I can help you find doctors, understand our services, or guide you to the login. How can I help today?",
+            text: "Hello! I'm your Aarogya AI Health Assistant. I can provide general health information and guidance. How can I help you today?",
             sender: "bot",
             timestamp: new Date(),
         },
@@ -50,33 +50,46 @@ export const HeroChat = () => {
         setInputValue("");
         setIsTyping(true);
 
-        // Simulate AI delay and response
-        setTimeout(() => {
-            const lowerText = userMsg.text.toLowerCase();
-            let botResponse = "I can help you with appointments, finding doctors, or checking your records. Please log in for personalized care.";
+        try {
+            // Call the actual backend AI API
+            const response = await fetch("http://localhost:8000/api/ai/chat/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message: userMsg.text,
+                    history: messages.slice(-10).map(m => ({
+                        role: m.sender === "user" ? "user" : "assistant",
+                        content: m.text
+                    }))
+                }),
+            });
 
-            if (lowerText.includes("book") || lowerText.includes("appointment")) {
-                botResponse = "To book an appointment, please register or log in to the Patient Portal. It's quick and easy!";
-            } else if (lowerText.includes("login") || lowerText.includes("sign in")) {
-                botResponse = "You can log in using the 'Patient Portal' or 'Staff Login' buttons at the top of the page.";
-            } else if (lowerText.includes("doctor") || lowerText.includes("specialist")) {
-                botResponse = "We have specialists in Cardiology, Neurology, Pediatrics, and more. Check our 'Departments' section below.";
-            } else if (lowerText.includes("sick") || lowerText.includes("pain") || lowerText.includes("fever") || lowerText.includes("symptom")) {
-                botResponse = "I'm sorry you're feeling unwell. Please log in to use our AI Symptom Checker or visit our Emergency department immediately if it's critical.";
-            } else if (lowerText.includes("hello") || lowerText.includes("hi")) {
-                botResponse = "Hello there! How can I assist you with your health journey today?";
+            if (response.ok) {
+                const data = await response.json();
+                const botMsg: Message = {
+                    id: (Date.now() + 1).toString(),
+                    text: data.reply || "I'm here to help! How can I assist you today?",
+                    sender: "bot",
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, botMsg]);
+            } else {
+                throw new Error("Failed to get response");
             }
-
-            const botMsg: Message = {
+        } catch (error) {
+            console.error("Chat error:", error);
+            const errorMsg: Message = {
                 id: (Date.now() + 1).toString(),
-                text: botResponse,
+                text: "I'm having trouble connecting right now. Please try again or contact our support team.",
                 sender: "bot",
                 timestamp: new Date(),
             };
-
-            setMessages((prev) => [...prev, botMsg]);
+            setMessages((prev) => [...prev, errorMsg]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -93,7 +106,7 @@ export const HeroChat = () => {
                         <Bot className="h-6 w-6" />
                     </div>
                     <div>
-                        <span className="block text-lg">Arogya Assistant</span>
+                        <span className="block text-lg">Aarogya AI Assistant</span>
                         <span className="block text-xs font-normal text-muted-foreground flex items-center gap-1">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
