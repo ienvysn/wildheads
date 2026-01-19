@@ -138,7 +138,7 @@ export const Header = () => {
               <Button variant="ghost" className="text-foreground" onClick={() => navigate("/login")}>
                 Staff Login
               </Button>
-              <Button onClick={() => navigate("/register")}>Patient Portal</Button>
+              <Button onClick={() => navigate("/contact")}>Contact Reception</Button>
             </>
           )}
         </div>

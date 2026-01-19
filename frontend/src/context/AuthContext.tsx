@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (username: string, password: string) => {
     try {
       setLoading(true);
-      const response = await authApi.login({ username, password });
+      const response = await authApi.login({ username_or_email: username, password });
 
       // Store tokens in Zustand
       setTokens(response.data.access, response.data.refresh);
@@ -66,9 +66,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     } catch (error: any) {
       console.error("Login failed:", error);
+      const apiMessage =
+        error.response?.data?.detail ||
+        error.response?.data?.non_field_errors?.[0] ||
+        error.response?.data?.username_or_email?.[0];
       toast({
         title: "Login Failed",
-        description: error.response?.data?.detail || "Invalid credentials. Please try again.",
+        description: apiMessage || (error.response ? "Invalid credentials. Please try again." : "Server unreachable. Please start the backend and try again."),
         variant: "destructive",
       });
       throw error;

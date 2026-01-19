@@ -44,78 +44,13 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 8 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Generate Patient ID
-      const patientId = generatePatientId();
-      setGeneratedPatientId(patientId);
-      setPatientId(patientId);
-
-      // Register user
-      const response = await authApi.register({
-        username: formData.email.split('@')[0], // Use email prefix as username
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        role: "patient",
-        patient_id: patientId,
-        phone: formData.phone,
-        date_of_birth: formData.dateOfBirth,
-        address: formData.address,
-      });
-
-      toast({
-        title: "Registration Successful!",
-        description: `Your Patient ID is: ${patientId}. Please save it for future reference.`,
-      });
-
-      // Show success modal with Patient ID
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
-    } catch (error: any) {
-      console.error("Registration failed:", error);
-      toast({
-        title: "Registration Failed",
-        description: error.response?.data?.detail || error.response?.data?.email?.[0] || "Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    toast({
+      title: "Registration Disabled",
+      description: "Please contact reception or a nurse to create your patient account.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -165,19 +100,17 @@ const Register = () => {
           <Card className="border-0 shadow-lg">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-2xl">Patient Registration</CardTitle>
-              <CardDescription>Create your account to get started</CardDescription>
+              <CardDescription>Registration is handled by reception or nurses</CardDescription>
             </CardHeader>
             <CardContent>
-              {generatedPatientId && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm font-medium text-green-800">
-                    Your Patient ID: <span className="font-bold">{generatedPatientId}</span>
-                  </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    Please save this ID for future reference
-                  </p>
-                </div>
-              )}
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm font-medium text-yellow-800">
+                  Patient accounts are created by reception or nurses.
+                </p>
+                <p className="text-xs text-yellow-700 mt-1">
+                  Please visit the reception desk or contact the hospital to get your login key.
+                </p>
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name */}
@@ -322,15 +255,8 @@ const Register = () => {
                 </div>
 
                 {/* Submit Button */}
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Spinner size="sm" className="mr-2" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Register"
-                  )}
+                <Button type="submit" className="w-full" size="lg" disabled>
+                  Registration Disabled
                 </Button>
 
                 {/* Login Link */}

@@ -1,17 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, Activity, Calendar, TrendingUp, AlertCircle } from "lucide-react";
+import { Users, UserCheck, Activity, Calendar, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAppointments, useDoctors, usePatients, useSummary } from "@/hooks/useApi";
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { data: patients } = usePatients();
+  const { data: doctors } = useDoctors();
+  const { data: appointments } = useAppointments();
+  const { data: summary } = useSummary();
+
+  const totalPatients = summary?.patients ?? (patients?.length || 0);
+  const totalStaff = ((summary?.doctors ?? (doctors?.length || 0)) + (summary?.nurses || 0) + (summary?.admins || 0));
+  const todaysAppointments = summary?.appointments ?? (appointments?.length || 0);
 
   const stats = [
     {
       title: "Total Patients",
-      value: "1,234",
+      value: totalPatients.toString(),
       change: "+12%",
       icon: Users,
       color: "text-blue-600",
@@ -19,7 +28,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Active Staff",
-      value: "89",
+      value: totalStaff.toString(),
       change: "+3",
       icon: UserCheck,
       color: "text-green-600",
@@ -27,7 +36,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Today's Appointments",
-      value: "45",
+      value: todaysAppointments.toString(),
       change: "-5%",
       icon: Calendar,
       color: "text-purple-600",
@@ -124,9 +133,7 @@ export default function AdminDashboard() {
               <CardDescription>View analytics and reports</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">
-                Generate Report
-              </Button>
+              <Button className="w-full" variant="outline" onClick={() => navigate("/admin/patients")}>View Patient Directory</Button>
             </CardContent>
           </Card>
         </div>
@@ -139,20 +146,23 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { action: "New patient registered", time: "5 minutes ago", type: "success" },
-                { action: "Doctor appointment scheduled", time: "15 minutes ago", type: "info" },
-                { action: "System backup completed", time: "1 hour ago", type: "success" },
-                { action: "Security alert resolved", time: "2 hours ago", type: "warning" },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{activity.action}</span>
+              {appointments && appointments.length > 0 ? (
+                appointments.slice(0, 4).map((apt: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">
+                        Appointment scheduled - {apt.patient_detail?.user?.first_name || "Patient"}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {apt.appointment_date ? new Date(apt.appointment_date).toLocaleString() : ""}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{activity.time}</span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No recent activity</p>
+              )}
             </div>
           </CardContent>
         </Card>

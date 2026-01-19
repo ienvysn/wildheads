@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env (if present)
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +30,10 @@ SECRET_KEY = 'django-insecure-b579z17on8aia7)68+l4$e*&fj$+-(xh)2m5$l))c1l_dpbd7$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,testserver"
+).split(",")
 
 
 # Application definition
@@ -213,7 +221,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-import os
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-mock-key")
 
 JAZZMIN_SETTINGS = {

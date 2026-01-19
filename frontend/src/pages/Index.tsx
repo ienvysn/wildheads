@@ -44,8 +44,8 @@ const Index = () => {
                 Book appointments, access records, and connect with top specialists—all in one place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="shadow-primary" onClick={() => navigate("/register")}>
-                  Get Started
+                <Button size="lg" className="shadow-primary" onClick={() => navigate("/contact")}>
+                  Contact Reception
                   <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => navigate("/login")}>

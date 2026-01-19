@@ -9,27 +9,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, User, FileText, Copy, Upload, File } from "lucide-react";
-
-// Mock existing patients - Start empty as requested
-const initialPatients: any[] = [];
+import { Plus, User, FileText, Copy } from "lucide-react";
+import { authApi } from "@/services/api";
+import { usePatients } from "@/hooks/useApi";
 
 const AdminPatients = () => {
     const { toast } = useToast();
-    const [patients, setPatients] = useState(initialPatients);
+    const { data: patientsData, isLoading, refetch } = usePatients();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [generatedId, setGeneratedId] = useState("");
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
         name: "",
-        age: "",
+        email: "",
         gender: "",
         contact: "",
-        weight: "",
-        height: "",
-        bp: "",
+        dateOfBirth: "",
         history: "",
         symptoms: "",
     });
@@ -38,41 +35,49 @@ const AdminPatients = () => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setUploadedFile(e.target.files[0]);
-        }
-    };
-
-    const handleCreatePatient = () => {
+    const handleCreatePatient = async () => {
         // Basic validation
-        if (!formData.name || !formData.age || !formData.gender || !uploadedFile) {
+        if (!formData.name || !formData.email || !formData.gender || !formData.dateOfBirth) {
             toast({
                 title: "Missing Information",
-                description: "Please fill in required details and upload the patient PDF.",
+                description: "Please fill in required details.",
                 variant: "destructive"
             });
             return;
         }
 
-        const newPid = `PID-2026-00${patients.length + 1}`;
-        setGeneratedId(newPid);
-
-        const newPatient = {
-            id: patients.length + 1,
-            name: formData.name,
-            pid: newPid,
-            age: parseInt(formData.age),
-            contact: formData.contact || "N/A",
-            gender: formData.gender,
-        };
-
-        setPatients([...patients, newPatient]);
-
-        toast({
-            title: "Patient Registered",
-            description: `ID: ${newPid} | File: ${uploadedFile.name} uploaded.`,
-        });
+        const newPid = `PID-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+        setIsSubmitting(true);
+        try {
+            const [firstName, ...lastParts] = formData.name.trim().split(" ");
+            const lastName = lastParts.join(" ");
+            await authApi.register({
+                username: newPid,
+                email: formData.email,
+                password: "arogya123",
+                role: "patient",
+                first_name: firstName || formData.name,
+                last_name: lastName || "",
+                date_of_birth: formData.dateOfBirth,
+                gender: formData.gender,
+                contact_number: formData.contact,
+                address: "",
+            });
+            setGeneratedId(newPid);
+            await refetch();
+            toast({
+                title: "Patient Registered",
+                description: `ID: ${newPid} | Default password: arogya123`,
+            });
+        } catch (error: any) {
+            toast({
+                title: "Registration Failed",
+                description: error.response?.data?.detail || error.response?.data?.email?.[0] || "Unable to create patient",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const copyToClipboard = (text: string) => {
@@ -95,8 +100,7 @@ const AdminPatients = () => {
                         setIsDialogOpen(open);
                         if (!open) {
                             setGeneratedId("");
-                            setUploadedFile(null);
-                            setFormData({ name: "", age: "", gender: "", contact: "", weight: "", height: "", bp: "", history: "", symptoms: "" });
+                            setFormData({ name: "", email: "", gender: "", contact: "", dateOfBirth: "", history: "", symptoms: "" });
                         }
                     }}>
                         <DialogTrigger asChild>
@@ -119,6 +123,10 @@ const AdminPatients = () => {
                                             <Input placeholder="e.g. John Doe" value={formData.name} onChange={e => handleInputChange("name", e.target.value)} />
                                         </div>
                                         <div className="space-y-2">
+                                            <Label>Email *</Label>
+                                            <Input placeholder="e.g. john@example.com" value={formData.email} onChange={e => handleInputChange("email", e.target.value)} />
+                                        </div>
+                                        <div className="space-y-2">
                                             <Label>Gender *</Label>
                                             <Select value={formData.gender} onValueChange={val => handleInputChange("gender", val)}>
                                                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
@@ -130,31 +138,12 @@ const AdminPatients = () => {
                                             </Select>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label>Age *</Label>
-                                            <Input type="number" placeholder="e.g. 30" value={formData.age} onChange={e => handleInputChange("age", e.target.value)} />
+                                            <Label>Date of Birth *</Label>
+                                            <Input type="date" value={formData.dateOfBirth} onChange={e => handleInputChange("dateOfBirth", e.target.value)} />
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Contact Number</Label>
                                             <Input placeholder="e.g. +1 234 567 890" value={formData.contact} onChange={e => handleInputChange("contact", e.target.value)} />
-                                        </div>
-                                    </div>
-
-                                    {/* Vitals */}
-                                    <div className="space-y-2">
-                                        <Label className="font-semibold text-primary">Vitals & Health Metrics</Label>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs">Weight (kg)</Label>
-                                                <Input placeholder="e.g. 70" value={formData.weight} onChange={e => handleInputChange("weight", e.target.value)} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs">Height (cm)</Label>
-                                                <Input placeholder="e.g. 175" value={formData.height} onChange={e => handleInputChange("height", e.target.value)} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-xs">Blood Pressure</Label>
-                                                <Input placeholder="e.g. 120/80" value={formData.bp} onChange={e => handleInputChange("bp", e.target.value)} />
-                                            </div>
                                         </div>
                                     </div>
 
@@ -169,38 +158,11 @@ const AdminPatients = () => {
                                         <Textarea placeholder="Past conditions, allergies..." value={formData.history} onChange={e => handleInputChange("history", e.target.value)} />
                                     </div>
 
-                                    {/* File Upload */}
-                                    <div className="space-y-2">
-                                        <Label>Upload Patient Report (PDF) *</Label>
-                                        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition-colors">
-                                            <Input
-                                                type="file"
-                                                accept=".pdf"
-                                                className="hidden"
-                                                id="file-upload"
-                                                onChange={handleFileChange}
-                                            />
-                                            <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <Upload className="h-5 w-5 text-primary" />
-                                                </div>
-                                                {uploadedFile ? (
-                                                    <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
-                                                        <File className="h-4 w-4" />
-                                                        {uploadedFile.name}
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-sm font-medium">Click to upload report</span>
-                                                        <span className="text-xs text-muted-foreground">PDF files only (Max 10MB)</span>
-                                                    </>
-                                                )}
-                                            </label>
-                                        </div>
-                                    </div>
 
                                     <DialogFooter className="pt-4">
-                                        <Button onClick={handleCreatePatient} className="w-full sm:w-auto">Generate Patient ID</Button>
+                                        <Button onClick={handleCreatePatient} className="w-full sm:w-auto" disabled={isSubmitting}>
+                                            {isSubmitting ? "Registering..." : "Generate Patient ID"}
+                                        </Button>
                                     </DialogFooter>
                                 </div>
                             ) : (
@@ -248,7 +210,7 @@ const AdminPatients = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle>Registered Patients</CardTitle>
-                        <CardDescription>Total {patients.length} active records</CardDescription>
+                        <CardDescription>Total {patientsData?.length || 0} active records</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -262,12 +224,16 @@ const AdminPatients = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {patients.map((patient) => (
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center text-muted-foreground">Loading patients...</TableCell>
+                                    </TableRow>
+                                ) : (patientsData || []).map((patient: any) => (
                                     <TableRow key={patient.id}>
-                                        <TableCell className="font-mono">{patient.pid}</TableCell>
-                                        <TableCell className="font-medium">{patient.name}</TableCell>
-                                        <TableCell>{patient.age} / {patient.gender}</TableCell>
-                                        <TableCell>{patient.contact}</TableCell>
+                                        <TableCell className="font-mono">{patient.user?.username || patient.id}</TableCell>
+                                        <TableCell className="font-medium">{patient.user?.first_name} {patient.user?.last_name}</TableCell>
+                                        <TableCell>{patient.date_of_birth || "N/A"} / {patient.gender || "N/A"}</TableCell>
+                                        <TableCell>{patient.contact_number || "N/A"}</TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="sm">View History</Button>
                                         </TableCell>

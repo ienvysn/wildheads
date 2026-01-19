@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from .services import DeepSeekClient
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,25 @@ MANDATORY CLOSING LINE (include in recommendations or a summary field):
 class AIOrchestrator:
     def __init__(self):
         self.client = DeepSeekClient()
+
+    def _strip_markdown(self, text: str) -> str:
+        """
+        Convert common markdown to plain text for UI safety.
+        """
+        if not text:
+            return text
+        cleaned = text
+        # Remove code fences
+        cleaned = re.sub(r"```[\s\S]*?```", "", cleaned)
+        # Remove inline code backticks
+        cleaned = cleaned.replace("`", "")
+        # Replace markdown links [text](url) -> text
+        cleaned = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", cleaned)
+        # Remove emphasis markers
+        cleaned = re.sub(r"(\*\*|__|\*|_)", "", cleaned)
+        # Collapse multiple blank lines
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+        return cleaned.strip()
         
     async def patient_chat(self, user_message: str, history: list = []):
         """
@@ -180,7 +200,7 @@ class AIOrchestrator:
             try:
                 response = await self.client.chat_completion(messages, temperature=0.7)
                 if response:
-                    return response
+                    return self._strip_markdown(response)
             except Exception as e:
                 logger.error(f"AI chat attempt {attempt + 1} failed: {e}")
                 if attempt == 1:  # Last attempt

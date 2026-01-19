@@ -12,3 +12,4 @@ cryptography
 django-axes
 django-csp
 requests
+python-dotenv

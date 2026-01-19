@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { AIHealthChat } from "@/components/patient/AIHealthChat";
-import { useAppointments, usePrescriptions, useTestResults } from "@/hooks/useApi";
+import { useAppointments, usePrescriptions, useTestResults, useVitals } from "@/hooks/useApi";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PatientDashboard() {
@@ -13,11 +13,14 @@ export default function PatientDashboard() {
   const { data: appointments, isLoading: appointmentsLoading } = useAppointments();
   const { data: prescriptions, isLoading: prescriptionsLoading } = usePrescriptions();
   const { data: testResults, isLoading: resultsLoading } = useTestResults();
+  const { data: vitals } = useVitals();
+
+  const latestVitals = Array.isArray(vitals) && vitals.length > 0 ? vitals[0] : null;
 
   const healthMetrics = [
     {
       title: "Blood Pressure",
-      value: "120/80",
+      value: latestVitals ? `${latestVitals.bp_systolic}/${latestVitals.bp_diastolic}` : "--/--",
       unit: "mmHg",
       status: "normal",
       icon: Heart,
@@ -26,7 +29,7 @@ export default function PatientDashboard() {
     },
     {
       title: "Heart Rate",
-      value: "72",
+      value: latestVitals?.heart_rate?.toString() || "--",
       unit: "bpm",
       status: "normal",
       icon: Activity,
@@ -35,7 +38,7 @@ export default function PatientDashboard() {
     },
     {
       title: "Temperature",
-      value: "98.6",
+      value: latestVitals?.temperature?.toString() || "--",
       unit: "°F",
       status: "normal",
       icon: Activity,
@@ -44,7 +47,7 @@ export default function PatientDashboard() {
     },
     {
       title: "Oxygen Level",
-      value: "98",
+      value: latestVitals?.oxygen_level?.toString() || "--",
       unit: "%",
       status: "normal",
       icon: Activity,
@@ -125,9 +128,11 @@ export default function PatientDashboard() {
                   <div className="space-y-3">
                     {appointments.slice(0, 3).map((apt: any, index: number) => (
                       <div key={index} className="border-b pb-2 last:border-0">
-                        <p className="font-medium text-sm">Dr. {apt.doctor || "Smith"}</p>
+                        <p className="font-medium text-sm">
+                          Dr. {apt.doctor_detail?.user?.first_name || ""} {apt.doctor_detail?.user?.last_name || ""}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(apt.date || Date.now()).toLocaleDateString()}
+                          {new Date(apt.appointment_date || Date.now()).toLocaleDateString()}
                         </p>
                       </div>
                     ))}
@@ -135,7 +140,7 @@ export default function PatientDashboard() {
                 ) : (
                   <p className="text-sm text-muted-foreground">No upcoming appointments</p>
                 )}
-                <Button className="w-full mt-4" variant="outline" size="sm">
+                <Button className="w-full mt-4" variant="outline" size="sm" onClick={() => navigate("/patient/records")}>
                   Book Appointment
                 </Button>
               </CardContent>
@@ -156,15 +161,15 @@ export default function PatientDashboard() {
                   <div className="space-y-3">
                     {prescriptions.slice(0, 3).map((rx: any, index: number) => (
                       <div key={index} className="border-b pb-2 last:border-0">
-                        <p className="font-medium text-sm">{rx.medicine_name || "Medication"}</p>
-                        <p className="text-xs text-muted-foreground">{rx.dosage || "As prescribed"}</p>
+                        <p className="font-medium text-sm">Prescription #{rx.id}</p>
+                        <p className="text-xs text-muted-foreground">{rx.notes || "As prescribed"}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No active prescriptions</p>
                 )}
-                <Button className="w-full mt-4" variant="outline" size="sm">
+                <Button className="w-full mt-4" variant="outline" size="sm" onClick={() => navigate("/patient/records")}>
                   View All
                 </Button>
               </CardContent>
@@ -185,9 +190,9 @@ export default function PatientDashboard() {
                   <div className="space-y-3">
                     {testResults.slice(0, 3).map((result: any, index: number) => (
                       <div key={index} className="border-b pb-2 last:border-0">
-                        <p className="font-medium text-sm">{result.test_name || "Blood Test"}</p>
+                        <p className="font-medium text-sm">{result.test_name || "Lab Test"}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(result.date || Date.now()).toLocaleDateString()}
+                          {new Date(result.date_completed || result.date_requested || Date.now()).toLocaleDateString()}
                         </p>
                       </div>
                     ))}

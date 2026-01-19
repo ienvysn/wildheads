@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { medicalApi, pharmacyApi, labApi, billingApi, aiApi } from "@/services/api";
+import { medicalApi, pharmacyApi, labApi, billingApi, aiApi, usersApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 // Medical Hooks
@@ -8,6 +8,61 @@ export const useAppointments = () => {
         queryKey: ["appointments"],
         queryFn: async () => {
             const response = await medicalApi.getAppointments();
+            return response.data;
+        },
+    });
+};
+
+export const useVitals = () => {
+    return useQuery({
+        queryKey: ["vitals"],
+        queryFn: async () => {
+            const response = await medicalApi.getVitals();
+            return response.data;
+        },
+    });
+};
+
+// Users Hooks
+export const usePatients = () => {
+    return useQuery({
+        queryKey: ["patients"],
+        queryFn: async () => {
+            const response = await usersApi.getPatients();
+            return response.data;
+        },
+    });
+};
+
+export const usePatient = (id?: number) => {
+    return useQuery({
+        queryKey: ["patient", id],
+        queryFn: async () => {
+            if (!id) {
+                return null;
+            }
+            const response = await usersApi.getPatient(id);
+            return response.data;
+        },
+        enabled: !!id,
+    });
+};
+
+export const useDoctors = () => {
+    return useQuery({
+        queryKey: ["doctors"],
+        queryFn: async () => {
+            const response = await usersApi.getDoctors();
+            return response.data;
+        },
+    });
+};
+
+export const useSummary = () => {
+    return useQuery({
+        queryKey: ["summary"],
+        queryFn: async () => {
+            const response = await usersApi.getSummary();
             return response.data;
         },
     });
@@ -97,6 +152,29 @@ export const useTestResults = () => {
         queryFn: async () => {
             const response = await labApi.getResults();
             return response.data;
+        },
+    });
+};
+
+export const useCreateTestResult = () => {
+    const queryClient = useQueryClient();
+    const { toast } = useToast();
+
+    return useMutation({
+        mutationFn: (formData: FormData) => labApi.createResult(formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["testResults"] });
+            toast({
+                title: "Success",
+                description: "Lab report uploaded successfully",
+            });
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Error",
+                description: error.response?.data?.detail || "Failed to upload report",
+                variant: "destructive",
+            });
         },
     });
 };

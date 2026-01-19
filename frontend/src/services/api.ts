@@ -54,6 +54,13 @@ export const authApi = {
     getProfile: () => api.get('users/profile/'),
 };
 
+export const usersApi = {
+  getPatients: () => api.get('users/patients/'),
+  getPatient: (id: number) => api.get(`users/patients/${id}/`),
+  getDoctors: () => api.get('users/doctors/'),
+  getSummary: () => api.get('users/summary/'),
+};
+
 export const medicalApi = {
     getVitals: () => api.get('medical/vitals/'), // Need to implement list view for this if not exists
     createVitals: (data: any) => api.post('medical/vitals/', data),
@@ -69,6 +76,9 @@ export const pharmacyApi = {
 export const labApi = {
     getLabTests: () => api.get('lab/tests/'),
     getResults: () => api.get('lab/results/'),
+  createResult: (formData: FormData) => api.post('lab/results/create/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 export const billingApi = {

@@ -1,13 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Users, AlertCircle, CheckCircle, Clock, FileText } from "lucide-react";
+import { Activity, Users, AlertCircle, CheckCircle, Clock, FileText, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useAppointments } from "@/hooks/useApi";
+import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 export default function NurseDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { data: appointments } = useAppointments();
+  const { toast } = useToast();
+
+  const queue = (appointments || []).slice(0, 4).map((apt: any, index: number) => ({
+    id: apt.id || index,
+    name: `${apt.patient_detail?.user?.first_name || "Patient"} ${apt.patient_detail?.user?.last_name || ""}`.trim(),
+    room: apt.room || "N/A",
+    status: "waiting",
+    priority: "normal",
+  }));
 
   const stats = [
     {
@@ -40,12 +53,7 @@ export default function NurseDashboard() {
     },
   ];
 
-  const patientQueue = [
-    { id: 1, name: "John Doe", room: "101", status: "waiting", priority: "normal" },
-    { id: 2, name: "Jane Smith", room: "102", status: "in-progress", priority: "high" },
-    { id: 3, name: "Mike Johnson", room: "103", status: "waiting", priority: "normal" },
-    { id: 4, name: "Sarah Williams", room: "104", status: "waiting", priority: "urgent" },
-  ];
+  const patientQueue = queue;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -55,48 +63,46 @@ export default function NurseDashboard() {
         return "bg-blue-100 text-blue-800";
       case "completed":
         return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+      const navItems = [
+        { label: "Dashboard", href: "/nurse/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+        { label: "Patients", href: "/nurse/patients", icon: <Users className="h-5 w-5" /> },
+      ];
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      return (
+        <DashboardLayout navItems={navItems}>
+        const patientQueue = (appointments || []).slice(0, 4).map((apt: any, index: number) => ({
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">Nurse Dashboard</h1>
+                <p className="text-sm text-muted-foreground">
+                  {user?.first_name || user?.username} {user?.last_name || ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => navigate("/nurse/patients")}>Patients</Button>
+                <Button variant="ghost" onClick={logout}>Logout</Button>
+            value: String(patientQueue.length),
+            </div>
             <div>
               <h1 className="text-2xl font-bold">Nurse Dashboard</h1>
               <p className="text-sm text-muted-foreground">
                 {user?.first_name || user?.username} {user?.last_name || ""}
               </p>
-            </div>
+            value: "0",
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => navigate("/")}>
                 Home
               </Button>
               <Button variant="ghost" onClick={logout}>
                 Logout
-              </Button>
+            value: "0",
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+            value: "0",
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {stats.map((stat, index) => {
@@ -146,9 +152,7 @@ export default function NurseDashboard() {
                       <Badge className={getStatusColor(patient.status)} variant="secondary">
                         {patient.status}
                       </Badge>
-                      <Button size="sm" variant="outline">
-                        Attend
-                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/nurse/patient/${patient.id}`)}>Attend</Button>
                     </div>
                   </div>
                 ))}
@@ -163,19 +167,19 @@ export default function NurseDashboard() {
               <CardDescription>Common nursing tasks</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => navigate("/nurse/patients")}> 
                 <Activity className="mr-2 h-4 w-4" />
-                Record Vitals
+                Record Vitals (Select Patient)
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => toast({ title: "Notes", description: "Patient notes can be updated in the patient view." })}>
                 <FileText className="mr-2 h-4 w-4" />
                 Update Patient Notes
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => toast({ title: "Emergency", description: "Use internal emergency workflow." })}>
                 <AlertCircle className="mr-2 h-4 w-4" />
                 Report Emergency
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => toast({ title: "Medication Schedule", description: "Medication schedule will appear here." })}>
                 <Clock className="mr-2 h-4 w-4" />
                 Medication Schedule
               </Button>
@@ -184,7 +188,7 @@ export default function NurseDashboard() {
         </div>
 
         {/* Today's Tasks */}
-        <Card className="mt-6">
+        <Card>
           <CardHeader>
             <CardTitle>Today's Tasks</CardTitle>
             <CardDescription>Scheduled tasks and reminders</CardDescription>
@@ -215,7 +219,7 @@ export default function NurseDashboard() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

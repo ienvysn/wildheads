@@ -13,6 +13,7 @@ import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientProfile from "./pages/doctor/PatientProfile";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
 import NursePatientView from "./pages/nurse/PatientView";
+import NursePatients from "./pages/nurse/NursePatients";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -67,6 +68,7 @@ const App = () => (
                 <ProtectedRoute allowedRoles={["nurse"]}>
                   <Routes>
                     <Route path="dashboard" element={<NurseDashboard />} />
+                    <Route path="patients" element={<NursePatients />} />
                     <Route path="patient/:id" element={<NursePatientView />} />
                     <Route path="*" element={<NurseDashboard />} />
                   </Routes>

@@ -44,10 +44,10 @@ const roleConfig = {
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [role, setRole] = useState<UserRole>("patient");
-  const [email, setEmail] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +56,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!usernameOrEmail || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -69,7 +69,7 @@ const Login = () => {
 
     try {
       // Login with backend
-      await login(email, password);
+      await login(usernameOrEmail, password);
 
       // After successful login, get user profile to determine role
       // The AuthContext already fetches the profile, so we can access it
@@ -82,6 +82,15 @@ const Login = () => {
           import("@/services/api").then(({ authApi }) => {
             authApi.getProfile().then((response) => {
               const userRole = response.data.role as UserRole;
+              if (userRole !== role) {
+                logout();
+                toast({
+                  title: "Access Denied",
+                  description: `Your account is ${userRole}. Please select the correct role to log in.`,
+                  variant: "destructive",
+                });
+                return;
+              }
               const targetRoute = roleConfig[userRole]?.route || "/";
               navigate(targetRoute);
             }).catch(() => {
@@ -177,21 +186,24 @@ const Login = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Email */}
+                {/* Identifier */}
                 <div className="space-y-2">
-                  <Label>{role === "patient" ? "Patient ID" : "Email Address"}</Label>
+                  <Label>Username or Email</Label>
                   <div className="relative">
                     <Input
-                      type={role === "patient" ? "text" : "email"}
-                      placeholder={role === "patient" ? "PID-2026-001" : "name@arogya.com"}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type="text"
+                      placeholder="Username, Email or Patient ID"
+                      value={usernameOrEmail}
+                      onChange={(e) => setUsernameOrEmail(e.target.value)}
                       className="pl-10"
                       required
                       disabled={isLoading}
                     />
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    You can sign in with your username, email, or patient ID.
+                  </p>
                 </div>
 
                 {/* Password */}
@@ -238,10 +250,7 @@ const Login = () => {
 
                 {/* Register Link */}
                 <p className="text-center text-sm text-muted-foreground">
-                  New patient?{" "}
-                  <Link to="/register" className="text-primary font-medium hover:underline">
-                    Register Here
-                  </Link>
+                  New patient? Contact reception to create your account.
                 </p>
               </form>
             </CardContent>
