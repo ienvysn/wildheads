@@ -54,7 +54,7 @@ const DoctorDashboard = () => {
       >
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to UHCare Doctor Portal.</p>
+          <p className="text-muted-foreground">Welcome to Arogya Doctor Portal.</p>
         </div>
 
         {/* Stats Grid */}

@@ -161,7 +161,7 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Why Choose UHCare?
+              Why Choose Arogya?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               We combine cutting-edge technology with compassionate care to deliver
@@ -255,7 +255,7 @@ const Index = () => {
                 Ready to Experience Better Healthcare?
               </h2>
               <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-                Join thousands of patients who trust UHCare for their healthcare needs.
+                Join thousands of patients who trust Arogya for their healthcare needs.
                 Register today and take control of your health journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

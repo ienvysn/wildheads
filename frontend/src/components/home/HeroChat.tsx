@@ -17,7 +17,7 @@ export const HeroChat = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "1",
-            text: "Hello! I'm your UHCare AI Assistant. I can help you find doctors, understand our services, or guide you to the login. How can I help today?",
+            text: "Hello! I'm your Arogya AI Assistant. I can help you find doctors, understand our services, or guide you to the login. How can I help today?",
             sender: "bot",
             timestamp: new Date(),
         },
@@ -93,7 +93,7 @@ export const HeroChat = () => {
                         <Bot className="h-6 w-6" />
                     </div>
                     <div>
-                        <span className="block text-lg">UHCare Assistant</span>
+                        <span className="block text-lg">Arogya Assistant</span>
                         <span className="block text-xs font-normal text-muted-foreground flex items-center gap-1">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -123,8 +123,8 @@ export const HeroChat = () => {
                                             {message.sender === "user" ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4 text-primary" />}
                                         </div>
                                         <div className={`p-3 rounded-2xl text-sm ${message.sender === "user"
-                                                ? "bg-primary text-primary-foreground rounded-tr-none"
-                                                : "bg-muted/50 border border-border rounded-tl-none"
+                                            ? "bg-primary text-primary-foreground rounded-tr-none"
+                                            : "bg-muted/50 border border-border rounded-tl-none"
                                             }`}>
                                             {message.text}
                                         </div>

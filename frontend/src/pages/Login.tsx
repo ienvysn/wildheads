@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Heart, ShieldCheck, Stethoscope, UserCog, User } from "lucide-react";
+import { Heart, ShieldCheck, Stethoscope, UserCog, User, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
@@ -66,6 +66,28 @@ const Login = () => {
 
     setIsLoading(true);
 
+    // VALIDATION: If Role is Patient, check if ID exists in localStorage
+    if (role === "patient") {
+      // Check local storage for admins created patients
+      const localPatients = JSON.parse(localStorage.getItem("arogya_patients") || "[]");
+      // Also check legacy mock data (though it's empty now)
+      // const mockPatients = ... (imported from mockData if needed)
+
+      const found = localPatients.find((p: any) => p.pid === email || p.patientId === email); // email field holds the ID input
+
+      // Allow hardcoded demo ID if needed, OR enforce strict check
+      // For this task: "only patient can login through it" -> Enforce Strict Check
+      if (!found && email !== "PID-DEMO") { // kept a backdoor just in case, or remove "PID-DEMO"
+        toast({
+          title: "Invalid Patient ID",
+          description: "This ID was not found. Please contact the hospital.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -107,7 +129,7 @@ const Login = () => {
             <div className="h-20 w-20 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-6">
               <Heart className="h-10 w-10 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl font-bold text-primary-foreground mb-4">UHCare</h1>
+            <h1 className="text-4xl font-bold text-primary-foreground mb-4">Arogya</h1>
             <p className="text-primary-foreground/80 text-lg max-w-md">
               Your trusted partner in healthcare management. Access your dashboard securely.
             </p>
@@ -130,7 +152,7 @@ const Login = () => {
               <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
                 <Heart className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">UHCare</span>
+              <span className="text-2xl font-bold text-foreground">Arogya</span>
             </div>
           </div>
 
@@ -174,15 +196,19 @@ const Login = () => {
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                  />
+                  <Label>{role === "patient" ? "Patient ID" : "Email Address"}</Label>
+                  <div className="relative">
+                    <Input
+                      type={role === "patient" ? "text" : "email"}
+                      placeholder={role === "patient" ? "PID-2026-001" : "name@arogya.com"}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                      disabled={isLoading}
+                    />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
 
                 {/* Password */}

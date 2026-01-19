@@ -20,7 +20,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "User Management", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Patient Management", href: "/admin/patients", icon: <Users className="h-5 w-5" /> },
   { label: "Departments", href: "/admin/departments", icon: <Building2 className="h-5 w-5" /> },
   { label: "Appointments", href: "/admin/appointments", icon: <Calendar className="h-5 w-5" /> },
   { label: "Billing", href: "/admin/billing", icon: <Receipt className="h-5 w-5" /> },

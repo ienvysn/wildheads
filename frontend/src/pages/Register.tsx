@@ -1,418 +1,268 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Heart, User, Building, Stethoscope } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
-
-interface FormData {
-  // Step 1: Account
-  email: string;
-  password: string;
-  confirmPassword: string;
-  // Step 2: Personal
-  fullName: string;
-  dateOfBirth: string;
-  gender: string;
-  phone: string;
-  address: string;
-  emergencyContact: string;
-  emergencyPhone: string;
-  // Step 3: Medical
-  allergies: string;
-  chronicConditions: string;
-  currentMedications: string;
-  pastSurgeries: string;
-}
-
-const steps = [
-  { id: 1, title: "Account", description: "Create your login credentials" },
-  { id: 2, title: "Personal", description: "Your personal information" },
-  { id: 3, title: "Medical", description: "Medical history (optional)" },
-];
-
-import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [step, setStep] = useState(1);
+  const [role, setRole] = useState<"patient" | "doctor" | "hospital" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    fullName: "",
-    dateOfBirth: "",
-    gender: "",
-    phone: "",
-    address: "",
-    emergencyContact: "",
-    emergencyPhone: "",
-    allergies: "",
-    chronicConditions: "",
-    currentMedications: "",
-    pastSurgeries: "",
-  });
 
-  const updateFormData = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  // Common Fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Patient Fields
+  const [patientName, setPatientName] = useState("");
+
+  // Doctor Fields
+  const [doctorName, setDoctorName] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [specialty, setSpecialty] = useState("");
+
+  // Hospital Fields
+  const [hospitalName, setHospitalName] = useState("");
+  const [regNumber, setRegNumber] = useState("");
+
+  const handleRoleSelect = (selectedRole: "patient" | "doctor" | "hospital") => {
+    setRole(selectedRole);
+    setStep(2);
   };
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 1:
-        if (!formData.email || !formData.password || !formData.confirmPassword) {
-          toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
-          return false;
-        }
-        if (formData.password !== formData.confirmPassword) {
-          toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
-          return false;
-        }
-        if (formData.password.length < 8) {
-          toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
-          return false;
-        }
-        return true;
-      case 2:
-        if (!formData.fullName || !formData.dateOfBirth || !formData.gender || !formData.phone) {
-          toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
-          return false;
-        }
-        return true;
-      default:
-        return true;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
+      return;
     }
-  };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 3));
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleSubmit = async (skipMedical = false) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    let finalRole: "patient" | "doctor" | "admin" = "patient";
+    let displayName = "";
+
+    if (role === "hospital") {
+      finalRole = "admin";
+      displayName = hospitalName;
+    } else if (role === "doctor") {
+      finalRole = "doctor";
+      displayName = doctorName;
+    } else {
+      finalRole = "patient";
+      displayName = patientName;
+    }
+
+    // Mock Login
+    await login({
+      name: displayName,
+      email,
+      role: finalRole,
+    });
 
     toast({
-      title: "Registration Successful!",
-      description: "Welcome to UHCare. You can now log in to your account.",
+      title: "Registration Successful",
+      description: `Welcome to Arogya, ${displayName}!`,
     });
 
-    // Login with Context
-    const role: UserRole = "patient"; // Default role for registration
-    login({
-      name: formData.fullName,
-      email: formData.email,
-      role
-    });
+    // Navigate based on role
+    if (role === "hospital") navigate("/admin/dashboard");
+    else if (role === "doctor") navigate("/doctor/dashboard");
+    else navigate("/patient/dashboard");
 
-    navigate("/patient/dashboard");
     setIsLoading(false);
   };
 
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {steps.map((step, index) => (
-        <div key={step.id} className="flex items-center">
-          <div className="flex flex-col items-center">
-            <div
-              className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center text-sm font-medium transition-all",
-                currentStep > step.id
-                  ? "bg-success text-success-foreground"
-                  : currentStep === step.id
-                    ? "gradient-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-              )}
-            >
-              {currentStep > step.id ? <Check className="h-5 w-5" /> : step.id}
-            </div>
-            <span className={cn(
-              "text-xs mt-1 hidden sm:block",
-              currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
-            )}>
-              {step.title}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <div
-              className={cn(
-                "w-12 sm:w-20 h-0.5 mx-2",
-                currentStep > step.id ? "bg-success" : "bg-muted"
-              )}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderStep1 = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
-    >
-      <div className="space-y-2">
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Enter your email"
-          value={formData.email}
-          onChange={(e) => updateFormData("email", e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password *</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Create a password"
-          value={formData.password}
-          onChange={(e) => updateFormData("password", e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground">
-          Must be at least 8 characters with 1 uppercase and 1 number
-        </p>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password *</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="Confirm your password"
-          value={formData.confirmPassword}
-          onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-        />
-      </div>
-    </motion.div>
-  );
-
-  const renderStep2 = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
-    >
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Full Name *</Label>
-        <Input
-          id="fullName"
-          placeholder="Enter your full name"
-          value={formData.fullName}
-          onChange={(e) => updateFormData("fullName", e.target.value)}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-          <Input
-            id="dateOfBirth"
-            type="date"
-            value={formData.dateOfBirth}
-            onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="gender">Gender *</Label>
-          <Select value={formData.gender} onValueChange={(v) => updateFormData("gender", v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number *</Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="(555) 123-4567"
-          value={formData.phone}
-          onChange={(e) => updateFormData("phone", e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          placeholder="Enter your address"
-          value={formData.address}
-          onChange={(e) => updateFormData("address", e.target.value)}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="emergencyContact">Emergency Contact</Label>
-          <Input
-            id="emergencyContact"
-            placeholder="Contact name"
-            value={formData.emergencyContact}
-            onChange={(e) => updateFormData("emergencyContact", e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="emergencyPhone">Emergency Phone</Label>
-          <Input
-            id="emergencyPhone"
-            type="tel"
-            placeholder="Phone number"
-            value={formData.emergencyPhone}
-            onChange={(e) => updateFormData("emergencyPhone", e.target.value)}
-          />
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const renderStep3 = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
-    >
-      <div className="p-4 rounded-lg bg-info/10 border border-info/20 text-sm text-info mb-4">
-        <p>ℹ️ This information helps us provide better care. You can skip this step and add it later.</p>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="allergies">Allergies</Label>
-        <Textarea
-          id="allergies"
-          placeholder="List any known allergies"
-          value={formData.allergies}
-          onChange={(e) => updateFormData("allergies", e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="chronicConditions">Chronic Conditions</Label>
-        <Textarea
-          id="chronicConditions"
-          placeholder="List any chronic conditions"
-          value={formData.chronicConditions}
-          onChange={(e) => updateFormData("chronicConditions", e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="currentMedications">Current Medications</Label>
-        <Textarea
-          id="currentMedications"
-          placeholder="List current medications"
-          value={formData.currentMedications}
-          onChange={(e) => updateFormData("currentMedications", e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="pastSurgeries">Past Surgeries</Label>
-        <Textarea
-          id="pastSurgeries"
-          placeholder="List any past surgeries"
-          value={formData.pastSurgeries}
-          onChange={(e) => updateFormData("pastSurgeries", e.target.value)}
-        />
-      </div>
-    </motion.div>
-  );
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
-      <motion.div
-        className="w-full max-w-lg"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Logo */}
-        <div className="flex items-center justify-center mb-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-              <Heart className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">UHCare</span>
-          </Link>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Left Banner */}
+      <div className="hidden lg:flex flex-col justify-center items-center gradient-primary text-primary-foreground p-12 relative overflow-hidden">
+        <div className="relative z-10 text-center max-w-lg">
+          <div className="h-20 w-20 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-8">
+            <Heart className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold mb-4">Join Arogya Service</h1>
+          <p className="text-lg opacity-90">
+            Connect with the best healthcare ecosystem. Whether you are a patient seeking care, a doctor offering expertise, or a hospital managing operations.
+          </p>
         </div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+      </div>
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl">Create Your Account</CardTitle>
-            <CardDescription>{steps[currentStep - 1].description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {renderStepIndicator()}
+      {/* Right Form Area */}
+      <div className="flex items-center justify-center p-6 bg-background">
+        <div className="w-full max-w-md space-y-8">
+          <div className="lg:hidden flex items-center gap-2 justify-center mb-8">
+            <Heart className="h-8 w-8 text-primary" />
+            <span className="text-2xl font-bold">Arogya</span>
+          </div>
 
-            <AnimatePresence mode="wait">
-              {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
-            </AnimatePresence>
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
-              {currentStep > 1 ? (
-                <Button variant="outline" onClick={handleBack} disabled={isLoading}>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Back
-                </Button>
-              ) : (
-                <div />
-              )}
-
-              {currentStep < 3 ? (
-                <Button onClick={handleNext}>
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isLoading}>
-                    Skip
-                  </Button>
-                  <Button onClick={() => handleSubmit(false)} disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Spinner size="sm" className="mr-2" />
-                        Creating...
-                      </>
-                    ) : (
-                      "Complete Registration"
-                    )}
-                  </Button>
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-6"
+              >
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold">Who are you?</h2>
+                  <p className="text-muted-foreground">Select your role to get started.</p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Already have an account?{" "}
-          <Link to="/login" className="text-primary font-medium hover:underline">
-            Sign In
-          </Link>
-        </p>
-      </motion.div>
+                <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 text-center">
+                  <p className="font-semibold text-primary">Are you a Patient?</p>
+                  <p className="text-sm text-muted-foreground">
+                    Patient registration is now handled by the hospital directly.
+                    Please visit your nearest Arogya center to get your <b>Patient ID</b> and credentials.
+                  </p>
+                </div>
+
+                <div className="grid gap-4">
+
+                  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => handleRoleSelect("doctor")}>
+                    <CardHeader className="flex flex-row items-center gap-4 py-4">
+                      <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                        <Stethoscope className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">I am a Doctor</CardTitle>
+                        <CardDescription>Manage patients & consultations</CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+
+                  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => handleRoleSelect("hospital")}>
+                    <CardHeader className="flex flex-row items-center gap-4 py-4">
+                      <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                        <Building className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Hospital Admin</CardTitle>
+                        <CardDescription>Register your facility & staff</CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </div>
+
+                <p className="text-center text-sm">
+                  Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Log in</Link>
+                </p>
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold">
+                    {role === "patient" && "Patient Registration"}
+                    {role === "doctor" && "Doctor Registration"}
+                    {role === "hospital" && "Hospital Registration"}
+                  </h2>
+                  <p className="text-muted-foreground">Please fill in your details.</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Role Specific Fields */}
+                  {role === "patient" && (
+                    <div className="space-y-2">
+                      <Label>Full Name</Label>
+                      <Input value={patientName} onChange={e => setPatientName(e.target.value)} placeholder="John Doe" required />
+                    </div>
+                  )}
+
+                  {role === "doctor" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Dr. Full Name</Label>
+                        <Input value={doctorName} onChange={e => setDoctorName(e.target.value)} placeholder="Dr. Jane Smith" required />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>License Number</Label>
+                          <Input value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="MED-12345" required />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Specialty</Label>
+                          <Select value={specialty} onValueChange={setSpecialty}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cardiology">Cardiology</SelectItem>
+                              <SelectItem value="pediatrics">Pediatrics</SelectItem>
+                              <SelectItem value="neurology">Neurology</SelectItem>
+                              <SelectItem value="orthopedics">Orthopedics</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {role === "hospital" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Hospital Name</Label>
+                        <Input value={hospitalName} onChange={e => setHospitalName(e.target.value)} placeholder="City General Hospital" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Registration Number</Label>
+                        <Input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="HOS-998877" required />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Common Fields */}
+                  <div className="space-y-2">
+                    <Label>Email Address</Label>
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" required />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Password</Label>
+                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Confirm Password</Label>
+                    <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
+                      Back
+                    </Button>
+                    <Button type="submit" className="flex-1" disabled={isLoading}>
+                      {isLoading ? <Spinner size="sm" className="mr-2" /> : "Complete Registration"}
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 };

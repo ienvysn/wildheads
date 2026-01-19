@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminPatients from "./pages/admin/AdminPatients";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientProfile from "./pages/doctor/PatientProfile";
 import NurseDashboard from "./pages/nurse/NurseDashboard";
@@ -38,6 +39,7 @@ const App = () => (
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <Routes>
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="patients" element={<AdminPatients />} />
                     <Route path="*" element={<AdminDashboard />} />
                   </Routes>
                 </ProtectedRoute>

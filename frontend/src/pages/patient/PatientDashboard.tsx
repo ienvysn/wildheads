@@ -1,49 +1,101 @@
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { AppointmentCard } from "@/components/dashboard/AppointmentCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   LayoutDashboard,
   Calendar,
   FileText,
-  Receipt,
-  MessageSquare,
-  Plus,
   Activity,
   Pill,
-  FileCheck,
-  ChevronRight
+  CreditCard,
+  Lock,
+  Search,
+  Scale,
+  Droplets
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
-  { label: "Home", href: "/patient/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
+  { label: "Overview", href: "/patient/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
   { label: "Appointments", href: "/patient/appointments", icon: <Calendar className="h-5 w-5" /> },
   { label: "Medical Records", href: "/patient/records", icon: <FileText className="h-5 w-5" /> },
-  { label: "Bills & Payments", href: "/patient/billing", icon: <Receipt className="h-5 w-5" /> },
-];
-
-const recentActivity = [
-  // { id: "1", icon: Pill, text: "Prescription ready - Paracetamol 500mg", date: "Jan 18", type: "prescription" },
+  { label: "Prescriptions", href: "/patient/prescriptions", icon: <Pill className="h-5 w-5" /> },
+  { label: "Billing", href: "/patient/billing", icon: <CreditCard className="h-5 w-5" /> },
 ];
 
 const PatientDashboard = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleBookAppointment = () => {
-    toast({
-      title: "Book Appointment",
-      description: "Opening appointment booking form",
-    });
+  // Symptom Popup State
+  const [showSymptomPopup, setShowSymptomPopup] = useState(false);
+  const [currentSymptom, setCurrentSymptom] = useState("");
+
+  // Report Code State
+  const [reportCode, setReportCode] = useState("");
+
+  // Fetch real patient data from localStorage based on the ID used to login
+  const patientData = (() => {
+    const localPatients = JSON.parse(localStorage.getItem("arogya_patients") || "[]");
+    // The 'email' field in AuthContext currently holds the Patient ID for patients
+    return localPatients.find((p: any) => p.pid === user?.email || p.patientId === user?.email);
+  })();
+
+  const displayVitals = {
+    bp: patientData?.bp || "Pending",
+    weight: patientData?.weight || "--",
+    height: patientData?.height || "--",
+    // Default values for fields not yet in admin form but needed for UI balance
+    heartRate: "72",
+    glucose: "95"
   };
 
-  const handleViewRecords = () => {
+  useEffect(() => {
+    // Show popup if not shown in this session (mock)
+    const hasCheckedIn = sessionStorage.getItem("arogya_symptom_check");
+    if (!hasCheckedIn) {
+      // Small delay for better UX
+      setTimeout(() => setShowSymptomPopup(true), 1000);
+    }
+  }, []);
+
+  const handleSymptomSubmit = () => {
+    if (!currentSymptom) return;
+
     toast({
-      title: "Medical Records",
-      description: "Opening your medical records",
+      title: "Symptom Logged",
+      description: "We've updated your health profile. A nurse will review this shortly.",
     });
+    sessionStorage.setItem("arogya_symptom_check", "true");
+    setShowSymptomPopup(false);
+  };
+
+  const handleReportAccess = () => {
+    if (!reportCode) return;
+    toast({
+      title: "Accessing Report...",
+      description: `Searching for secure report code: ${reportCode}`,
+    });
+    // Mock simulation
+    setTimeout(() => {
+      toast({
+        title: "Report Found!",
+        description: "Redirecting to your secure document viewer.",
+        variant: "default"
+      });
+      navigate("/patient/records");
+    }, 1500);
   };
 
   return (
@@ -54,129 +106,123 @@ const PatientDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Health Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back. Here's your health overview.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Hello, {patientData?.name || user?.name || "Patient"}
+            </h1>
+            <p className="text-muted-foreground">
+              Patient ID: <span className="font-mono font-medium text-primary">{patientData?.pid || user?.email}</span>
+            </p>
+          </div>
+          <Button onClick={() => setShowSymptomPopup(true)} variant="outline">
+            <Activity className="mr-2 h-4 w-4" />
+            Check Symptoms
+          </Button>
         </div>
 
-        {/* AI Assistant Card */}
-        <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary-light to-background">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-foreground mb-1">Health Assistant</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Get help with booking appointments, checking symptoms, or viewing your records.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={handleBookAppointment}>
-                    Book Appointment
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={handleViewRecords}>
-                    View Records
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Blood Pressure"
+            value={displayVitals.bp}
+            icon={<Activity className="h-6 w-6" />}
+            trend={displayVitals.bp === "Pending" ? "Update Needed" : "Normal"}
+            trendUp={true}
+            variant={displayVitals.bp === "Pending" ? "warning" : "success"}
+          />
+          <StatCard
+            title="Weight"
+            value={displayVitals.weight}
+            icon={<Scale className="h-6 w-6" />}
+            trend="kg"
+            trendUp={true}
+          />
+          <StatCard
+            title="Height"
+            value={displayVitals.height}
+            icon={<Activity className="h-6 w-6" />}
+            trend="cm"
+            trendUp={true}
+            variant="info"
+          />
+          <StatCard
+            title="Glucose"
+            value={displayVitals.glucose}
+            icon={<Droplets className="h-6 w-6" />}
+            trend="mg/dL"
+            trendUp={true}
+            variant="primary"
+          />
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Upcoming Appointments */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Upcoming Appointments</h2>
-              <Button size="sm" onClick={handleBookAppointment}>
-                <Plus className="h-4 w-4 mr-1" />
-                Book New
-              </Button>
-            </div>
+          <div className="lg:col-span-2 space-y-6">
+            {/* Quick Report Access */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2 text-primary">
+                  <Lock className="h-5 w-5" />
+                  Access Private Report
+                </CardTitle>
+                <CardDescription>
+                  Enter the secure code provided by your doctor or hospital to view specific reports.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Enter Code (e.g. REP-2026)"
+                    value={reportCode}
+                    onChange={(e) => setReportCode(e.target.value)}
+                    className="bg-background max-w-sm"
+                  />
+                  <Button onClick={handleReportAccess}>
+                    <Search className="h-4 w-4 mr-2" />
+                    View Report
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* No appointments yet */}
-              <div className="col-span-2 text-center text-muted-foreground py-8 border rounded-lg bg-muted/20">
-                No upcoming appointments
-              </div>
+            {/* Appointments Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Upcoming Appointments</h3>
+              <Card className="p-6 text-center text-muted-foreground border-dashed">
+                <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No upcoming appointments scheduled.</p>
+                <Button variant="link" className="mt-2 h-auto p-0">Book an appointment</Button>
+              </Card>
             </div>
           </div>
-
-          {/* Health Summary */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Health Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                <p className="text-sm font-medium text-success">Overall Health: Good</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Last checkup: Jan 12, 2026
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium mb-2">Active Prescriptions</p>
-                <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">No active prescriptions</div>
-                </div>
-              </div>
-
-              <Button variant="outline" className="w-full" onClick={handleViewRecords}>
-                View Full Records
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </CardContent>
-          </Card>
+          <div>
+            <ActivityFeed activities={[]} />
+          </div>
         </div>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => {
-                const Icon = activity.icon;
-                return (
-                  <div key={activity.id} className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.text}</p>
-                      <p className="text-xs text-muted-foreground">{activity.date}</p>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      View
-                    </Button>
-                  </div>
-                );
-              })}
+        {/* Symptom Checker Modal */}
+        <Dialog open={showSymptomPopup} onOpenChange={setShowSymptomPopup}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>How are you feeling today?</DialogTitle>
+              <DialogDescription>
+                Briefly describe any symptoms or issues you are facing. This helps your doctor stay updated.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea
+                placeholder="E.g., I have a mild headache and fever..."
+                value={currentSymptom}
+                onChange={(e) => setCurrentSymptom(e.target.value)}
+                rows={4}
+              />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Button variant="outline" size="lg" className="h-auto py-4 flex-col gap-2">
-            <Calendar className="h-6 w-6" />
-            <span>Book Appointment</span>
-          </Button>
-          <Button variant="outline" size="lg" className="h-auto py-4 flex-col gap-2">
-            <FileText className="h-6 w-6" />
-            <span>Download Records</span>
-          </Button>
-          <Button variant="outline" size="lg" className="h-auto py-4 flex-col gap-2">
-            <Receipt className="h-6 w-6" />
-            <span>Pay Bills</span>
-          </Button>
-        </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowSymptomPopup(false)}>Skip</Button>
+              <Button onClick={handleSymptomSubmit}>Submit Update</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </DashboardLayout>
   );

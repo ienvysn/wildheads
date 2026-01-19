@@ -12,7 +12,7 @@ export const Footer = () => {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                 <Heart className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-semibold">UHCare</span>
+              <span className="text-xl font-semibold">Arogya</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Providing quality healthcare with cutting-edge technology and compassionate care.
@@ -48,7 +48,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>contact@uhcare.com</span>
+                <span>contact@arogya.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -74,7 +74,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-muted-foreground/20 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} UHCare Hospital. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Arogya Hospital. All rights reserved.</p>
         </div>
       </div>
     </footer>

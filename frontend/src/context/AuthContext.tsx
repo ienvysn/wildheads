@@ -23,13 +23,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Check local storage for persisted user
-    const storedUser = localStorage.getItem("uhcare_user");
+    const storedUser = localStorage.getItem("arogya_user");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         console.error("Failed to parse user data", e);
-        localStorage.removeItem("uhcare_user");
+        localStorage.removeItem("arogya_user");
       }
     }
     setIsLoading(false);
@@ -37,12 +37,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem("uhcare_user", JSON.stringify(userData));
+    localStorage.setItem("arogya_user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("uhcare_user");
+    localStorage.removeItem("arogya_user");
   };
 
   return (
