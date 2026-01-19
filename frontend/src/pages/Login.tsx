@@ -11,8 +11,8 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
 import logo from "@/image/arogya.png";
-
 import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuthStore } from "@/store";
 
 const roleConfig = {
   admin: { // Hospital Admin
@@ -39,6 +39,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login } = useAuth();
+  const { setUser } = useAuthStore();
   const [role, setRole] = useState<UserRole>("patient");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,52 +49,27 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      if (role === "patient") {
-        // Check local storage for admins created patients
-        const localPatients = JSON.parse(localStorage.getItem("arogya_patients") || "[]");
-        const found = localPatients.find((p: any) => p.pid === email || p.patientId === email);
+      // Universal Demo Login: Allow any email/password
+      const targetRoute = roleConfig[role].route;
 
-        if (!found && email !== "PID-DEMO") {
-          toast({
-            title: "Invalid Patient ID",
-            description: "This ID was not found. Please contact your hospital.",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
-        }
-      }
+      // Try to find the registered user name
+      const demoUsers = JSON.parse(localStorage.getItem("demo_users") || "[]");
+      const registeredUser = demoUsers.find((u: any) => u.email === email && u.role === role);
 
-      // Login with backend
-      await login(email, password);
+      // Mock the user in global state to satisfy ProtectedRoute
+      setUser({
+        id: Date.now(),
+        username: email || "user",
+        email: email || "demo@example.com",
+        role: role,
+        first_name: registeredUser ? registeredUser.name : (role === "admin" ? "Hospital Admin" : "Registered User"),
+        last_name: ""
+      });
 
-      // After successful login, get user profile to determine role
-      setTimeout(() => {
-        const token = localStorage.getItem("access_token");
-        if (token) {
-          import("@/services/api").then(({ authApi }) => {
-            authApi.getProfile().then((response) => {
-              const userRole = response.data.role as UserRole;
-              const targetRoute = roleConfig[userRole]?.route || roleConfig[role].route;
-              navigate(targetRoute);
-            }).catch(() => {
-              navigate(roleConfig[role].route);
-            });
-          });
-        }
-      }, 200);
+      navigate(targetRoute);
     } catch (error) {
       console.error("Login error:", error);
     } finally {

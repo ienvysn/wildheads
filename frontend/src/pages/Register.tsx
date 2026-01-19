@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { authApi } from "@/services/api";
 import logo from "@/image/arogya.png";
 
-type RegisterRole = "hospital" | "doctor";
+type RegisterRole = "hospital" | "doctor" | "patient";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -60,33 +60,19 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // Mapping roles for backend: 
-      // hospital -> admin (in our current schema) or we keep it as hospital if backend supports it
-      const backendRole = role === "hospital" ? "admin" : "doctor";
-
-      await authApi.register({
-        username: formData.email.split('@')[0],
+      // Universal Demo Register: Persist user info for login
+      const users = JSON.parse(localStorage.getItem("demo_users") || "[]");
+      users.push({
+        name: formData.name,
         email: formData.email,
-        password: formData.password,
-        first_name: role === "hospital" ? formData.name : formData.name.split(' ')[0],
-        last_name: role === "hospital" ? "" : (formData.name.split(' ')[1] || ""),
-        role: backendRole,
-        phone: formData.phone,
+        role: role,
+        password: formData.password
       });
-
-      toast({
-        title: "Registration Successful!",
-        description: "Your account has been created. Please login to continue.",
-      });
+      localStorage.setItem("demo_users", JSON.stringify(users));
 
       navigate("/login");
     } catch (error: any) {
       console.error("Registration failed:", error);
-      toast({
-        title: "Registration Failed",
-        description: error.response?.data?.detail || "Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -172,8 +158,8 @@ const Register = () => {
 
                 <div className="text-center space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Looking for patient login? <br />
-                    <span className="text-primary font-medium">Patients are registered by hospitals only.</span>
+                    Joining as a staff member? <br />
+                    <span className="text-primary font-medium">Hospitals and Doctors can register their facilities.</span>
                   </p>
                   <p className="text-sm">
                     Already have an account?{" "}
@@ -199,7 +185,7 @@ const Register = () => {
                 <Card className="border-0 shadow-lg">
                   <CardHeader className="text-center pb-2">
                     <CardTitle className="text-2xl">
-                      {role === "hospital" ? "Hospital Registration" : "Doctor Registration"}
+                      {role === "hospital" ? "Hospital Registration" : role === "doctor" ? "Doctor Registration" : "Patient Registration"}
                     </CardTitle>
                     <CardDescription>Fill in your details to create an account</CardDescription>
                   </CardHeader>
