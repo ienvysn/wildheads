@@ -1,267 +1,350 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Heart, User, Building, Stethoscope } from "lucide-react";
+import { Heart, User, Mail, Lock, Phone, Calendar, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
-import { useAuth } from "@/context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { authApi } from "@/services/api";
+import { usePatientStore } from "@/store";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState<"patient" | "doctor" | "hospital" | null>(null);
+  const { setPatientId } = usePatientStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [generatedPatientId, setGeneratedPatientId] = useState<string | null>(null);
 
-  // Common Fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    address: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  // Patient Fields
-  const [patientName, setPatientName] = useState("");
+  // Generate Patient ID
+  const generatePatientId = () => {
+    const year = new Date().getFullYear();
+    const random = Math.floor(100000 + Math.random() * 900000);
+    return `PID-${year}-${random}`;
+  };
 
-  // Doctor Fields
-  const [doctorName, setDoctorName] = useState("");
-  const [licenseNumber, setLicenseNumber] = useState("");
-  const [specialty, setSpecialty] = useState("");
-
-  // Hospital Fields
-  const [hospitalName, setHospitalName] = useState("");
-  const [regNumber, setRegNumber] = useState("");
-
-  const handleRoleSelect = (selectedRole: "patient" | "doctor" | "hospital") => {
-    setRole(selectedRole);
-    setStep(2);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
+
+    // Validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    let finalRole: "patient" | "doctor" | "admin" = "patient";
-    let displayName = "";
+    try {
+      // Generate Patient ID
+      const patientId = generatePatientId();
+      setGeneratedPatientId(patientId);
+      setPatientId(patientId);
 
-    if (role === "hospital") {
-      finalRole = "admin";
-      displayName = hospitalName;
-    } else if (role === "doctor") {
-      finalRole = "doctor";
-      displayName = doctorName;
-    } else {
-      finalRole = "patient";
-      displayName = patientName;
+      // Register user
+      const response = await authApi.register({
+        username: formData.email.split('@')[0], // Use email prefix as username
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        role: "patient",
+        patient_id: patientId,
+        phone: formData.phone,
+        date_of_birth: formData.dateOfBirth,
+        address: formData.address,
+      });
+
+      toast({
+        title: "Registration Successful!",
+        description: `Your Patient ID is: ${patientId}. Please save it for future reference.`,
+      });
+
+      // Show success modal with Patient ID
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+    } catch (error: any) {
+      console.error("Registration failed:", error);
+      toast({
+        title: "Registration Failed",
+        description: error.response?.data?.detail || error.response?.data?.email?.[0] || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    // Mock Login
-    await login({
-      name: displayName,
-      email,
-      role: finalRole,
-    });
-
-    toast({
-      title: "Registration Successful",
-      description: `Welcome to Arogya, ${displayName}!`,
-    });
-
-    // Navigate based on role
-    if (role === "hospital") navigate("/admin/dashboard");
-    else if (role === "doctor") navigate("/doctor/dashboard");
-    else navigate("/patient/dashboard");
-
-    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Banner */}
-      <div className="hidden lg:flex flex-col justify-center items-center gradient-primary text-primary-foreground p-12 relative overflow-hidden">
-        <div className="relative z-10 text-center max-w-lg">
-          <div className="h-20 w-20 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-8">
-            <Heart className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Join Arogya Service</h1>
-          <p className="text-lg opacity-90">
-            Connect with the best healthcare ecosystem. Whether you are a patient seeking care, a doctor offering expertise, or a hospital managing operations.
-          </p>
+    <div className="min-h-screen flex">
+      {/* Left Panel - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 gradient-primary items-center justify-center p-12 relative overflow-hidden">
+        <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="h-20 w-20 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-6">
+              <Heart className="h-10 w-10 text-primary-foreground" />
+            </div>
+            <h1 className="text-4xl font-bold text-primary-foreground mb-4">Join Aarogya</h1>
+            <p className="text-primary-foreground/80 text-lg max-w-md">
+              Register now to access world-class healthcare services with AI-powered assistance.
+            </p>
+          </motion.div>
         </div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Right Form Area */}
-      <div className="flex items-center justify-center p-6 bg-background">
-        <div className="w-full max-w-md space-y-8">
-          <div className="lg:hidden flex items-center gap-2 justify-center mb-8">
-            <Heart className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">Arogya</span>
+      {/* Right Panel - Registration Form */}
+      <div className="flex-1 flex items-center justify-center p-6 bg-background overflow-y-auto">
+        <motion.div
+          className="w-full max-w-md"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="lg:hidden flex items-center justify-center mb-8">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
+                <Heart className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="text-2xl font-bold text-foreground">Aarogya</span>
+            </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            {step === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="space-y-6"
-              >
-                <div className="text-center">
-                  <h2 className="text-3xl font-bold">Who are you?</h2>
-                  <p className="text-muted-foreground">Select your role to get started.</p>
-                </div>
-
-                <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 text-center">
-                  <p className="font-semibold text-primary">Are you a Patient?</p>
-                  <p className="text-sm text-muted-foreground">
-                    Patient registration is now handled by the hospital directly.
-                    Please visit your nearest Arogya center to get your <b>Patient ID</b> and credentials.
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="text-center pb-2">
+              <CardTitle className="text-2xl">Patient Registration</CardTitle>
+              <CardDescription>Create your account to get started</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {generatedPatientId && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm font-medium text-green-800">
+                    Your Patient ID: <span className="font-bold">{generatedPatientId}</span>
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    Please save this ID for future reference
                   </p>
                 </div>
+              )}
 
-                <div className="grid gap-4">
-
-                  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => handleRoleSelect("doctor")}>
-                    <CardHeader className="flex flex-row items-center gap-4 py-4">
-                      <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                        <Stethoscope className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">I am a Doctor</CardTitle>
-                        <CardDescription>Manage patients & consultations</CardDescription>
-                      </div>
-                    </CardHeader>
-                  </Card>
-
-                  <Card className="cursor-pointer hover:border-primary transition-all" onClick={() => handleRoleSelect("hospital")}>
-                    <CardHeader className="flex flex-row items-center gap-4 py-4">
-                      <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                        <Building className="h-6 w-6" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">Hospital Admin</CardTitle>
-                        <CardDescription>Register your facility & staff</CardDescription>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </div>
-
-                <p className="text-center text-sm">
-                  Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Log in</Link>
-                </p>
-              </motion.div>
-            )}
-
-            {step === 2 && (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold">
-                    {role === "patient" && "Patient Registration"}
-                    {role === "doctor" && "Doctor Registration"}
-                    {role === "hospital" && "Hospital Registration"}
-                  </h2>
-                  <p className="text-muted-foreground">Please fill in your details.</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Role Specific Fields */}
-                  {role === "patient" && (
-                    <div className="space-y-2">
-                      <Label>Full Name</Label>
-                      <Input value={patientName} onChange={e => setPatientName(e.target.value)} placeholder="John Doe" required />
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Name */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name *</Label>
+                    <div className="relative">
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        placeholder="John"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="pl-10"
+                        required
+                        disabled={isLoading}
+                      />
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     </div>
-                  )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      placeholder="Doe"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
 
-                  {role === "doctor" && (
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="john.doe@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="pl-10"
+                      required
+                      disabled={isLoading}
+                    />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <div className="relative">
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="pl-10"
+                      disabled={isLoading}
+                    />
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Date of Birth */}
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <div className="relative">
+                    <Input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                      className="pl-10"
+                      disabled={isLoading}
+                    />
+                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <div className="relative">
+                    <Input
+                      id="address"
+                      name="address"
+                      placeholder="123 Main St, City, State"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="pl-10"
+                      disabled={isLoading}
+                    />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="At least 8 characters"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="pl-10"
+                      required
+                      disabled={isLoading}
+                    />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="Re-enter password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="pl-10"
+                      required
+                      disabled={isLoading}
+                    />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                  {isLoading ? (
                     <>
-                      <div className="space-y-2">
-                        <Label>Dr. Full Name</Label>
-                        <Input value={doctorName} onChange={e => setDoctorName(e.target.value)} placeholder="Dr. Jane Smith" required />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>License Number</Label>
-                          <Input value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="MED-12345" required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Specialty</Label>
-                          <Select value={specialty} onValueChange={setSpecialty}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="cardiology">Cardiology</SelectItem>
-                              <SelectItem value="pediatrics">Pediatrics</SelectItem>
-                              <SelectItem value="neurology">Neurology</SelectItem>
-                              <SelectItem value="orthopedics">Orthopedics</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      <Spinner size="sm" className="mr-2" />
+                      Creating Account...
                     </>
+                  ) : (
+                    "Register"
                   )}
+                </Button>
 
-                  {role === "hospital" && (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Hospital Name</Label>
-                        <Input value={hospitalName} onChange={e => setHospitalName(e.target.value)} placeholder="City General Hospital" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Registration Number</Label>
-                        <Input value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="HOS-998877" required />
-                      </div>
-                    </>
-                  )}
+                {/* Login Link */}
+                <p className="text-center text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-primary font-medium hover:underline">
+                    Login Here
+                  </Link>
+                </p>
+              </form>
+            </CardContent>
+          </Card>
 
-                  {/* Common Fields */}
-                  <div className="space-y-2">
-                    <Label>Email Address</Label>
-                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Password</Label>
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Confirm Password</Label>
-                    <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                      Back
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={isLoading}>
-                      {isLoading ? <Spinner size="sm" className="mr-2" /> : "Complete Registration"}
-                    </Button>
-                  </div>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            <Link to="/" className="hover:text-foreground transition-colors">
+              ← Back to Home
+            </Link>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

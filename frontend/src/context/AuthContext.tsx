@@ -1,20 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { authApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
-export type UserRole = "admin" | "doctor" | "nurse" | "patient";
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: UserRole;
-  first_name?: string;
-  last_name?: string;
-}
+import { useAuthStore } from "@/store";
 
 interface AuthContextType {
-  user: User | null;
+  user: any;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -24,37 +14,45 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    setUser,
+    setTokens,
+    logout: logoutStore,
+    setLoading,
+    accessToken
+  } = useAuthStore();
 
   // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("access_token");
-      if (token) {
+      if (accessToken) {
         try {
           const response = await authApi.getProfile();
           setUser(response.data);
         } catch (error) {
           console.error("Failed to fetch user profile:", error);
-          // Clear invalid tokens
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
+          logoutStore();
         }
       }
-      setIsLoading(false);
+      setLoading(false);
     };
 
     checkAuth();
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
+  const login = async (username: string, password: string) => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       const response = await authApi.login({ username, password });
 
-      // Store tokens
+      // Store tokens in Zustand
+      setTokens(response.data.access, response.data.refresh);
+
+      // Also store in localStorage for API interceptor
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
 
@@ -75,26 +73,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [toast]);
+  };
 
-  const logout = useCallback(() => {
-    setUser(null);
+  const logout = () => {
+    logoutStore();
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
-  }, [toast]);
+  };
 
   const value = {
     user,
     login,
     logout,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated,
   };
 
   return (
@@ -111,3 +109,6 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export type { AuthContextType };
+export type UserRole = "admin" | "doctor" | "nurse" | "patient";
