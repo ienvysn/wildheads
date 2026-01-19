@@ -66,54 +66,36 @@ const Login = () => {
 
     setIsLoading(true);
 
-    // VALIDATION: If Role is Patient, check if ID exists in localStorage
-    if (role === "patient") {
-      // Check local storage for admins created patients
-      const localPatients = JSON.parse(localStorage.getItem("arogya_patients") || "[]");
-      // Also check legacy mock data (though it's empty now)
-      // const mockPatients = ... (imported from mockData if needed)
+    try {
+      // Login with backend
+      await login(email, password);
 
-      const found = localPatients.find((p: any) => p.pid === email || p.patientId === email); // email field holds the ID input
-
-      // Allow hardcoded demo ID if needed, OR enforce strict check
-      // For this task: "only patient can login through it" -> Enforce Strict Check
-      if (!found && email !== "PID-DEMO") { // kept a backdoor just in case, or remove "PID-DEMO"
-        toast({
-          title: "Invalid Patient ID",
-          description: "This ID was not found. Please contact the hospital.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
+      // After successful login, get user profile to determine role
+      // The AuthContext already fetches the profile, so we can access it
+      // We'll use a small delay to ensure state is updated
+      setTimeout(() => {
+        // Get the user data from localStorage or context
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          // Fetch user profile to get actual role
+          import("@/services/api").then(({ authApi }) => {
+            authApi.getProfile().then((response) => {
+              const userRole = response.data.role as UserRole;
+              const targetRoute = roleConfig[userRole]?.route || "/";
+              navigate(targetRoute);
+            }).catch(() => {
+              // Fallback to selected role if profile fetch fails
+              navigate(roleConfig[role].route);
+            });
+          });
+        }
+      }, 200);
+    } catch (error) {
+      // Error handling is done in AuthContext
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // For ethical hacking demo: Log the login attempt
-    console.log(`[SECURITY LOG] Login Attempt: ${email} | Role: ${role} | Time: ${new Date().toISOString()}`);
-
-    // Create a mock JWT token
-    const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoi${role}","email":"${email}"}`;
-    localStorage.setItem("uhcare_token", mockToken);
-
-    // Login with Context
-    login({
-      name: "User", // Default name if not from registration
-      email,
-      role
-    });
-
-    toast({
-      title: "Welcome back!",
-      description: `Logged in as ${roleConfig[role].label}`,
-    });
-
-    // In most cases, the ProtectedRoute or logic inside Login will handle this,
-    // but explicit navigation is good.
-    navigate(roleConfig[role].route);
-    setIsLoading(false);
   };
 
   return (
