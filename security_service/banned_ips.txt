@@ -1,0 +1,1 @@
+# Banned IPs - Format: IP:timestamp

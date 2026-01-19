@@ -1,0 +1,14 @@
+Django>=5.0.0
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+channels
+daphne
+redis
+channels-redis
+django-jazzmin
+httpx
+cryptography
+django-axes
+django-csp
+requests
