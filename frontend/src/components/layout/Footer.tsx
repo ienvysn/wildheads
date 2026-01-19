@@ -12,10 +12,10 @@ export const Footer = () => {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                 <Heart className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-semibold">Arogya</span>
+              <span className="text-xl font-semibold">Aarogya</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Providing quality healthcare with cutting-edge technology and compassionate care.
+              Providing quality healthcare with cutting-edge AI technology and compassionate care.
             </p>
           </div>
 
@@ -74,7 +74,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-muted-foreground/20 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Arogya Hospital. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Aarogya Hospital Management System. All rights reserved.</p>
         </div>
       </div>
     </footer>
