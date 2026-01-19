@@ -1,0 +1,3 @@
+# Banned IPs - Format: IP:timestamp
+# Permanent bans use timestamp 0.0
+# Timestamp-based bans expire after configured duration
