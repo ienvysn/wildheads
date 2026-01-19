@@ -2,13 +2,13 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  Calendar, 
-  Receipt, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  Calendar,
+  Receipt,
+  BarChart3,
   Settings,
   TrendingUp,
   UserPlus,
@@ -20,7 +20,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "User Management", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Patient Management", href: "/admin/patients", icon: <Users className="h-5 w-5" /> },
   { label: "Departments", href: "/admin/departments", icon: <Building2 className="h-5 w-5" /> },
   { label: "Appointments", href: "/admin/appointments", icon: <Calendar className="h-5 w-5" /> },
   { label: "Billing", href: "/admin/billing", icon: <Receipt className="h-5 w-5" /> },
@@ -29,26 +29,17 @@ const navItems = [
 ];
 
 const chartData = [
-  { name: "Mon", appointments: 32 },
-  { name: "Tue", appointments: 45 },
-  { name: "Wed", appointments: 38 },
-  { name: "Thu", appointments: 52 },
-  { name: "Fri", appointments: 48 },
-  { name: "Sat", appointments: 28 },
-  { name: "Sun", appointments: 15 },
+  // { name: "Mon", appointments: 32 },
 ];
 
 const activities = [
-  { id: "1", type: "patient" as const, message: "Dr. Smith completed 12 consultations", time: "2 hours ago" },
-  { id: "2", type: "patient" as const, message: "8 new patient registrations today", time: "4 hours ago" },
-  { id: "3", type: "billing" as const, message: "3 pending bill payments", time: "5 hours ago" },
-  { id: "4", type: "appointment" as const, message: "15 appointments scheduled for tomorrow", time: "6 hours ago" },
+  // { id: "1", type: "patient" as const, message: "Dr. Smith completed 12 consultations", time: "2 hours ago" },
 ];
 
 const AdminDashboard = () => {
   return (
-    <DashboardLayout navItems={navItems} userName="Admin User" userRole="Hospital Admin">
-      <motion.div 
+    <DashboardLayout navItems={navItems}>
+      <motion.div
         className="space-y-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -63,30 +54,27 @@ const AdminDashboard = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Total Patients"
-            value="1,247"
+            value="0"
             icon={<Users className="h-6 w-6" />}
             variant="primary"
-            trend={{ value: 12, isPositive: true }}
           />
           <StatCard
             title="Today's Appointments"
-            value="32"
+            value="0"
             icon={<Calendar className="h-6 w-6" />}
             variant="info"
-            trend={{ value: 8, isPositive: true }}
           />
           <StatCard
             title="Active Staff"
-            value="48"
+            value="0"
             icon={<Stethoscope className="h-6 w-6" />}
             variant="success"
           />
           <StatCard
             title="Revenue (Month)"
-            value="$45,230"
+            value="$0"
             icon={<DollarSign className="h-6 w-6" />}
             variant="warning"
-            trend={{ value: 15, isPositive: true }}
           />
         </div>
 
@@ -106,17 +94,17 @@ const AdminDashboard = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--background))", 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px"
                       }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="appointments" 
-                      stroke="hsl(var(--primary))" 
+                    <Line
+                      type="monotone"
+                      dataKey="appointments"
+                      stroke="hsl(var(--primary))"
                       strokeWidth={3}
                       dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
                     />
@@ -138,7 +126,7 @@ const AdminDashboard = () => {
                 <UserPlus className="h-6 w-6 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold">24</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">New Patients Today</p>
               </div>
             </CardContent>
@@ -149,7 +137,7 @@ const AdminDashboard = () => {
                 <Stethoscope className="h-6 w-6 text-info" />
               </div>
               <div>
-                <p className="text-2xl font-bold">156</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">Consultations This Week</p>
               </div>
             </CardContent>
@@ -160,7 +148,7 @@ const AdminDashboard = () => {
                 <Receipt className="h-6 w-6 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">Pending Payments</p>
               </div>
             </CardContent>

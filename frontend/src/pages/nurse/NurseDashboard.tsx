@@ -3,10 +3,10 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  LayoutDashboard, 
-  UserPlus, 
-  Clock, 
+import {
+  LayoutDashboard,
+  UserPlus,
+  Clock,
   Activity,
   Stethoscope,
   ClipboardList,
@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
@@ -23,25 +24,19 @@ const navItems = [
   { label: "Record Vitals", href: "/nurse/vitals", icon: <Activity className="h-5 w-5" /> },
 ];
 
-const pendingVitals = [
-  { id: "1", name: "Sarah Johnson", doctor: "Dr. Smith", time: "9:15 AM" },
-  { id: "2", name: "Mike Davis", doctor: "Dr. Brown", time: "9:30 AM" },
-  { id: "3", name: "Emma Wilson", doctor: "Dr. Smith", time: "9:45 AM" },
-];
+import { patients } from "@/data/mockData";
 
 const NurseDashboard = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleRecordVitals = (patientName: string) => {
-    toast({
-      title: "Recording Vitals",
-      description: `Opening vitals form for ${patientName}`,
-    });
+  const handleRecordVitals = (patientId: string) => {
+    navigate(`/nurse/patient/${patientId}`);
   };
 
   return (
-    <DashboardLayout navItems={navItems} userName="Mary Johnson" userRole="Nurse Station">
-      <motion.div 
+    <DashboardLayout navItems={navItems}>
+      <motion.div
         className="space-y-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,19 +51,19 @@ const NurseDashboard = () => {
         <div className="grid sm:grid-cols-3 gap-4">
           <StatCard
             title="Check-ins Today"
-            value="24"
+            value="0"
             icon={<UserPlus className="h-6 w-6" />}
             variant="primary"
           />
           <StatCard
             title="Pending Vitals"
-            value="3"
+            value="0"
             icon={<Activity className="h-6 w-6" />}
             variant="warning"
           />
           <StatCard
             title="Vitals Recorded"
-            value="21"
+            value="0"
             icon={<ClipboardList className="h-6 w-6" />}
             variant="success"
           />
@@ -106,7 +101,7 @@ const NurseDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {pendingVitals.map((patient) => (
+            {patients.map((patient, i) => (
               <div
                 key={patient.id}
                 className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
@@ -119,14 +114,12 @@ const NurseDashboard = () => {
                     <p className="font-medium">{patient.name}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Stethoscope className="h-3.5 w-3.5" />
-                      <span>{patient.doctor}'s queue</span>
-                      <span>•</span>
-                      <span>{patient.time}</span>
+                      <span>Dr. Smith's queue</span>
                     </div>
                   </div>
                 </div>
-                <Button size="sm" onClick={() => handleRecordVitals(patient.name)}>
-                  Record Vitals
+                <Button size="sm" onClick={() => handleRecordVitals(patient.id)}>
+                  View & Record
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -143,28 +136,8 @@ const NurseDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Dr. Smith</p>
-                  <Badge variant="secondary" className="bg-success/10 text-success">5 in queue</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">General Medicine</p>
-              </div>
-              <div className="p-4 rounded-lg border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Dr. Brown</p>
-                  <Badge variant="secondary" className="bg-warning/10 text-warning">3 in queue</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">Cardiology</p>
-              </div>
-              <div className="p-4 rounded-lg border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Dr. Wilson</p>
-                  <Badge variant="secondary" className="bg-info/10 text-info">7 in queue</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">Pediatrics</p>
-              </div>
+            <div className="text-sm text-muted-foreground text-center py-4">
+              No queue data available
             </div>
           </CardContent>
         </Card>

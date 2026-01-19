@@ -3,10 +3,10 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { PatientQueueCard } from "@/components/dashboard/PatientQueueCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
+import {
+  LayoutDashboard,
+  Users,
+  Calendar,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -24,55 +24,29 @@ const navItems = [
   { label: "Schedule", href: "/doctor/schedule", icon: <Calendar className="h-5 w-5" /> },
 ];
 
-const queuePatients = [
-  { 
-    id: "1", 
-    name: "Sarah Johnson", 
-    time: "9:15 AM", 
-    type: "general" as const, 
-    complaint: "Fever, cough",
-    hasAiScreening: true
-  },
-  { 
-    id: "2", 
-    name: "Mike Davis", 
-    time: "9:30 AM", 
-    type: "follow-up" as const, 
-    complaint: "Hypertension check"
-  },
-  { 
-    id: "3", 
-    name: "Emma Wilson", 
-    time: "9:45 AM", 
-    type: "general" as const, 
-    complaint: "Headache",
-    hasAiScreening: true
-  },
-  { 
-    id: "4", 
-    name: "John Chen", 
-    time: "10:00 AM", 
-    type: "emergency" as const, 
-    complaint: "Chest pain"
-  },
-];
+import { patients } from "@/data/mockData";
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Transform mock data for the dashboard view
+  const dashboardQueue = patients.map((p, i) => ({
+    id: p.id,
+    name: p.name,
+    time: ["9:15 AM", "9:45 AM", "10:30 AM"][i] || "11:00 AM",
+    type: "general" as const,
+    complaint: p.history[0] || "General Checkup",
+    hasAiScreening: true
+  }));
+
   const handleStartConsultation = (patientId: string) => {
-    const patient = queuePatients.find(p => p.id === patientId);
-    toast({
-      title: "Starting Consultation",
-      description: `Opening consultation for ${patient?.name}`,
-    });
-    navigate(`/doctor/consultation/${patientId}`);
+    navigate(`/doctor/patient/${patientId}`);
   };
 
   return (
-    <DashboardLayout navItems={navItems} userName="Dr. John Smith" userRole="Doctor Portal">
-      <motion.div 
+    <DashboardLayout navItems={navItems}>
+      <motion.div
         className="space-y-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -80,26 +54,26 @@ const DoctorDashboard = () => {
       >
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
-          <p className="text-muted-foreground">Good morning, Dr. Smith. You have patients waiting.</p>
+          <p className="text-muted-foreground">Welcome to Arogya Doctor Portal.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid sm:grid-cols-3 gap-4">
           <StatCard
             title="Today's Appointments"
-            value="13"
+            value="0"
             icon={<Calendar className="h-6 w-6" />}
             variant="primary"
           />
           <StatCard
             title="In Queue"
-            value="5"
+            value="0"
             icon={<Clock className="h-6 w-6" />}
             variant="warning"
           />
           <StatCard
             title="Completed Today"
-            value="8"
+            value="0"
             icon={<CheckCircle className="h-6 w-6" />}
             variant="success"
           />
@@ -108,8 +82,8 @@ const DoctorDashboard = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Patient Queue */}
           <div className="lg:col-span-2">
-            <PatientQueueCard 
-              patients={queuePatients} 
+            <PatientQueueCard
+              patients={dashboardQueue}
               onStartConsultation={handleStartConsultation}
             />
           </div>
@@ -147,13 +121,8 @@ const DoctorDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm font-medium text-destructive">Critical Patient</p>
-                  <p className="text-xs text-muted-foreground">John Chen - Chest pain reported</p>
-                </div>
-                <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
-                  <p className="text-sm font-medium text-warning">Lab Results Ready</p>
-                  <p className="text-xs text-muted-foreground">3 pending reviews</p>
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  No alerts at this time.
                 </div>
               </CardContent>
             </Card>

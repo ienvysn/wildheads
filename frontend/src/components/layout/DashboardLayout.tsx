@@ -1,10 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { 
-  Heart, 
-  Menu, 
-  X, 
+import {
+  Heart,
+  Menu,
+  X,
   Bell,
   User,
   LogOut,
@@ -33,12 +33,20 @@ interface DashboardLayoutProps {
   userRole: string;
 }
 
-export const DashboardLayout = ({ children, navItems, userName, userRole }: DashboardLayoutProps) => {
+import { useAuth } from "@/context/AuthContext";
+
+export const DashboardLayout = ({ children, navItems }: { children: ReactNode, navItems: NavItem[] }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  // Use context user data or defaults
+  const displayName = user?.name || "Guest User";
+  const displayRole = user?.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : "Portal";
 
   const handleLogout = () => {
+    logout();
     navigate("/login");
   };
 
@@ -54,12 +62,12 @@ export const DashboardLayout = ({ children, navItems, userName, userRole }: Dash
             >
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            
+
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
                 <Heart className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold text-foreground hidden sm:inline">{userRole}</span>
+              <span className="text-lg font-semibold text-foreground hidden sm:inline">{displayRole}</span>
             </Link>
           </div>
 
@@ -77,7 +85,7 @@ export const DashboardLayout = ({ children, navItems, userName, userRole }: Dash
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                     <User className="h-4 w-4 text-primary-foreground" />
                   </div>
-                  <span className="hidden sm:inline text-sm font-medium">{userName}</span>
+                  <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>

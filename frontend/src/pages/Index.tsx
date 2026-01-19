@@ -3,15 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { 
-  Calendar, 
-  Clock, 
-  Shield, 
-  Stethoscope, 
-  Heart, 
-  Brain, 
-  Baby, 
-  Bone, 
+import {
+  Calendar,
+  Clock,
+  Shield,
+  Stethoscope,
+  Heart,
+  Brain,
+  Baby,
+  Bone,
   Eye,
   Activity,
   Users,
@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { HeroChat } from "@/components/home/HeroChat";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -79,12 +80,12 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="relative overflow-hidden gradient-hero">
         <div className="container py-20 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
+            <motion.div
               className="space-y-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -99,7 +100,7 @@ const Index = () => {
                 <span className="text-primary">Fingertips</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl">
-                Experience seamless healthcare management with our integrated system. 
+                Experience seamless healthcare management with our integrated system.
                 Book appointments, access records, and connect with top specialists—all in one place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -113,24 +114,14 @@ const Index = () => {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="relative hidden lg:block"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <div className="relative z-10">
-                <div className="w-full aspect-square max-w-lg mx-auto rounded-3xl gradient-primary p-1">
-                  <div className="w-full h-full rounded-3xl bg-background flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <div className="h-24 w-24 rounded-2xl gradient-primary mx-auto mb-6 flex items-center justify-center">
-                        <Heart className="h-12 w-12 text-primary-foreground" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-foreground mb-2">MediCare Hospital</h3>
-                      <p className="text-muted-foreground">Your Health, Our Priority</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="relative z-10 w-full max-w-lg mx-auto">
+                <HeroChat />
               </div>
               <div className="absolute -top-4 -right-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
               <div className="absolute -bottom-4 -left-4 w-72 h-72 bg-info/10 rounded-full blur-3xl" />
@@ -144,7 +135,7 @@ const Index = () => {
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 className="text-center"
                 initial={{ opacity: 0, y: 20 }}
@@ -163,22 +154,22 @@ const Index = () => {
       {/* Features Section */}
       <section id="features" className="py-20">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Why Choose MediCare?
+              Why Choose Arogya?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We combine cutting-edge technology with compassionate care to deliver 
+              We combine cutting-edge technology with compassionate care to deliver
               the best healthcare experience for you and your family.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
             variants={staggerContainer}
             initial="initial"
@@ -205,7 +196,7 @@ const Index = () => {
       {/* Departments Section */}
       <section id="departments" className="py-20 bg-muted/50">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -215,12 +206,12 @@ const Index = () => {
               Our Departments
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive healthcare services across multiple specialties, 
+              Comprehensive healthcare services across multiple specialties,
               staffed by experienced professionals.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={staggerContainer}
             initial="initial"
@@ -253,7 +244,7 @@ const Index = () => {
       {/* CTA Section */}
       <section id="about" className="py-20">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="relative rounded-3xl overflow-hidden gradient-primary p-12 lg:p-16 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -264,20 +255,20 @@ const Index = () => {
                 Ready to Experience Better Healthcare?
               </h2>
               <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-                Join thousands of patients who trust MediCare for their healthcare needs. 
+                Join thousands of patients who trust Arogya for their healthcare needs.
                 Register today and take control of your health journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="secondary"
                   onClick={() => navigate("/register")}
                 >
                   Register as Patient
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
+                <Button
+                  size="lg"
+                  variant="outline"
                   className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                   onClick={() => navigate("/login")}
                 >
