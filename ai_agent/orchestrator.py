@@ -106,12 +106,16 @@ class AIOrchestrator:
         
     async def patient_chat(self, user_message: str, history: list = []):
         """
-        Handle patient chat with safety guards.
+        Handle patient chat with safety guards and fallback responses.
         """
         # 1. Simple Keyword Safety Check (Pre-LLM)
         critical_keywords = ["suicide", "kill myself", "die", "bomb", "chest pain"]
         if any(k in user_message.lower() for k in critical_keywords):
             return "Safety Alert: Immediate help is available. Please call emergency services or go to the nearest hospital."
+        
+        # 2. Check if API key is configured
+        if not self.client.api_key:
+            return self._get_fallback_patient_response(user_message)
             
         messages = [
             {"role": "system", "content": PATIENT_AGENT_PROMPT}
@@ -122,11 +126,61 @@ class AIOrchestrator:
         
         messages.append({"role": "user", "content": user_message})
         
-        response = await self.client.chat_completion(messages, temperature=0.7)
-        if not response:
-            return "I'm having trouble connecting to my knowledge base. Please try again later."
-            
-        return response
+        # Try to get AI response with retry
+        for attempt in range(2):
+            try:
+                response = await self.client.chat_completion(messages, temperature=0.7)
+                if response:
+                    return response
+            except Exception as e:
+                logger.error(f"AI chat attempt {attempt + 1} failed: {e}")
+                if attempt == 1:  # Last attempt
+                    break
+        
+        # Fallback response if AI is unavailable
+        return self._get_fallback_patient_response(user_message)
+    
+    def _get_fallback_patient_response(self, user_message: str):
+        """
+        Provide helpful fallback responses when AI is unavailable.
+        """
+        message_lower = user_message.lower()
+        
+        # Common health queries
+        if any(word in message_lower for word in ["appointment", "book", "schedule"]):
+            return ("You can book an appointment through our Patient Portal. Please log in and navigate to the "
+                   "Appointments section, or call our reception at +1 (555) 123-4567.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        if any(word in message_lower for word in ["fever", "temperature", "hot"]):
+            return ("Fever can be a sign of infection or illness. Monitor your temperature regularly. "
+                   "If it persists above 100.4°F (38°C) for more than 2 days, or if you experience severe symptoms, "
+                   "please consult a doctor.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        if any(word in message_lower for word in ["headache", "head pain"]):
+            return ("Headaches can have various causes including stress, dehydration, or lack of sleep. "
+                   "Rest, hydration, and over-the-counter pain relievers may help. If headaches are severe, "
+                   "persistent, or accompanied by other symptoms, please consult a doctor.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        if any(word in message_lower for word in ["medicine", "medication", "prescription"]):
+            return ("For information about your prescribed medications, please consult with your doctor or pharmacist. "
+                   "You can also check your prescription details in the Patient Portal under 'Prescriptions'.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        if any(word in message_lower for word in ["test", "result", "lab", "report"]):
+            return ("Your test results will be available in the Patient Portal once they're ready. "
+                   "Your doctor will review them and discuss the findings with you during your follow-up appointment.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Default fallback
+        return ("I'm currently experiencing technical difficulties and cannot provide detailed health guidance at the moment. "
+               "For medical concerns, please:\n"
+               "• Contact your doctor directly\n"
+               "• Call our helpline: +1 (555) 123-4567\n"
+               "• Visit our emergency department for urgent matters\n\n"
+               "This information is for general guidance only and is not a medical diagnosis.")
 
     async def doctor_analysis(self, age: int, gender: str, vitals: dict, history: dict, symptoms: list):
         """
