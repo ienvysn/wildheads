@@ -23,12 +23,18 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <nav className="flex flex-col gap-2">
-              <a href="#features" className="text-sm text-muted-foreground hover:text-background transition-colors">
+              <Link to="/" className="text-sm text-muted-foreground hover:text-background transition-colors">
+                Home
+              </Link>
+              <Link to="/features" className="text-sm text-muted-foreground hover:text-background transition-colors">
                 Features
-              </a>
-              <a href="#departments" className="text-sm text-muted-foreground hover:text-background transition-colors">
-                Departments
-              </a>
+              </Link>
+              <Link to="/about" className="text-sm text-muted-foreground hover:text-background transition-colors">
+                About Us
+              </Link>
+              <Link to="/contact" className="text-sm text-muted-foreground hover:text-background transition-colors">
+                Contact
+              </Link>
               <Link to="/login" className="text-sm text-muted-foreground hover:text-background transition-colors">
                 Staff Login
               </Link>

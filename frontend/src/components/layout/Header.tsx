@@ -56,17 +56,41 @@ export const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
+            to="/"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Home
+          </Link>
+          <Link
             to="/features"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Features
           </Link>
-          <Link
-            to="/about"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            About Us
-          </Link>
+          {!isAuthenticated && (
+            <>
+              <Link
+                to="/about"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact
+              </Link>
+            </>
+          )}
+          {isAuthenticated && user && (
+            <Link
+              to={getDashboardRoute()}
+              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Dashboard
+            </Link>
+          )}
         </nav>
 
         {/* Desktop Auth Section */}
@@ -135,19 +159,46 @@ export const Header = () => {
           >
             <nav className="container flex flex-col gap-4 py-4">
               <Link
+                to="/"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
                 to="/features"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Features
               </Link>
-              <Link
-                to="/about"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About Us
-              </Link>
+              {!isAuthenticated && (
+                <>
+                  <Link
+                    to="/about"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    About
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Contact
+                  </Link>
+                </>
+              )}
+              {isAuthenticated && user && (
+                <Link
+                  to={getDashboardRoute()}
+                  className="text-sm font-medium text-primary hover:text-primary/80"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
 
               {isAuthenticated && user ? (
                 <div className="flex flex-col gap-2 pt-2 border-t border-border">
