@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout, isAuthenticated } = useAuth();
 
   const handleLogout = () => {
@@ -44,8 +43,6 @@ export const Header = () => {
     return user.username[0].toUpperCase();
   };
 
-  const isHomePage = location.pathname === "/";
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -57,22 +54,20 @@ export const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        {isHomePage && (
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              to="/features"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Features
-            </Link>
-            <Link
-              to="/about"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              About Us
-            </Link>
-          </nav>
-        )}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link
+            to="/features"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Features
+          </Link>
+          <Link
+            to="/about"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            About Us
+          </Link>
+        </nav>
 
         {/* Desktop Auth Section */}
         <div className="hidden md:flex items-center gap-3">
@@ -139,24 +134,20 @@ export const Header = () => {
             className="md:hidden border-t border-border bg-background"
           >
             <nav className="container flex flex-col gap-4 py-4">
-              {isHomePage && (
-                <>
-                  <Link
-                    to="/features"
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Features
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    About Us
-                  </Link>
-                </>
-              )}
+              <Link
+                to="/features"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                to="/about"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About Us
+              </Link>
 
               {isAuthenticated && user ? (
                 <div className="flex flex-col gap-2 pt-2 border-t border-border">
