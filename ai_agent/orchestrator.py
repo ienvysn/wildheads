@@ -108,12 +108,61 @@ class AIOrchestrator:
         """
         Handle patient chat with safety guards and fallback responses.
         """
-        # 1. Simple Keyword Safety Check (Pre-LLM)
-        critical_keywords = ["suicide", "kill myself", "die", "bomb", "chest pain"]
-        if any(k in user_message.lower() for k in critical_keywords):
-            return "Safety Alert: Immediate help is available. Please call emergency services or go to the nearest hospital."
+        # 1. Critical Emergency Keywords (Immediate Alert)
+        critical_emergency = ["suicide", "kill myself", "end my life", "want to die"]
+        if any(k in user_message.lower() for k in critical_emergency):
+            return ("🚨 **Immediate Help Available**\n\n"
+                   "If you're experiencing a mental health crisis:\n"
+                   "• **National Suicide Prevention Lifeline**: 988 (24/7)\n"
+                   "• **Crisis Text Line**: Text HOME to 741741\n"
+                   "• **Emergency Services**: 911\n\n"
+                   "You don't have to face this alone. Please reach out for help right now.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
         
-        # 2. Check if API key is configured
+        # 2. Serious Medical Concerns (Diplomatic Response)
+        serious_conditions = [
+            "cancer", "tumor", "malignant", "metastasis", "chemotherapy",
+            "hiv", "aids", "heart attack", "stroke", "organ failure",
+            "terminal", "dying", "fatal", "life threatening"
+        ]
+        if any(condition in user_message.lower() for condition in serious_conditions):
+            return ("I understand you have serious health concerns. These are important medical matters that require professional evaluation.\n\n"
+                   "**What I recommend:**\n"
+                   "• **Speak with your doctor** - They can provide proper assessment and guidance\n"
+                   "• **Schedule an appointment** - Call us at +1 (555) 123-4567\n"
+                   "• **Emergency symptoms?** - Visit our ER or call 911\n\n"
+                   "I'm not able to assess or diagnose serious medical conditions, but our medical team is here to help you. "
+                   "Please don't hesitate to reach out to them directly.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # 3. Diagnostic Questions (Redirect to Doctor)
+        diagnostic_phrases = [
+            "do i have", "is this", "could this be", "am i", "is it",
+            "diagnose", "what disease", "what's wrong with me"
+        ]
+        if any(phrase in user_message.lower() for phrase in diagnostic_phrases):
+            # Check if asking about serious condition
+            if any(word in user_message.lower() for word in ["cancer", "tumor", "disease", "condition", "illness"]):
+                return ("I understand you're concerned about your symptoms. However, I'm not able to provide diagnoses or confirm/rule out medical conditions.\n\n"
+                       "**Here's what you should do:**\n"
+                       "• **Consult your doctor** - They can properly evaluate your symptoms\n"
+                       "• **Book an appointment** - Call +1 (555) 123-4567 or use the Patient Portal\n"
+                       "• **Urgent symptoms?** - Visit our emergency department\n\n"
+                       "Your health concerns deserve professional medical attention. Our doctors are here to help.\n\n"
+                       "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # 4. Chest Pain or Severe Symptoms (Emergency)
+        emergency_symptoms = ["chest pain", "can't breathe", "difficulty breathing", "severe bleeding", "unconscious"]
+        if any(symptom in user_message.lower() for symptom in emergency_symptoms):
+            return ("🚨 **This may be a medical emergency!**\n\n"
+                   "**Take immediate action:**\n"
+                   "• **Call 911** or your local emergency number NOW\n"
+                   "• **Go to the nearest ER** - Don't drive yourself\n"
+                   "• **Our Emergency Dept**: +1 (555) 911-0000 (24/7)\n\n"
+                   "Don't wait - seek emergency care immediately!\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # 5. Check if API key is configured
         if not self.client.api_key:
             return self._get_fallback_patient_response(user_message)
             
