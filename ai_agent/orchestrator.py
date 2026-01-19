@@ -146,40 +146,144 @@ class AIOrchestrator:
         """
         message_lower = user_message.lower()
         
-        # Common health queries
-        if any(word in message_lower for word in ["appointment", "book", "schedule"]):
-            return ("You can book an appointment through our Patient Portal. Please log in and navigate to the "
-                   "Appointments section, or call our reception at +1 (555) 123-4567.\n\n"
+        # Greetings
+        if any(word in message_lower for word in ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"]):
+            return ("Hello! I'm your Aarogya Health Assistant. I'm here to help with general health information and guide you through our services. "
+                   "How can I assist you today?\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
-        if any(word in message_lower for word in ["fever", "temperature", "hot"]):
-            return ("Fever can be a sign of infection or illness. Monitor your temperature regularly. "
-                   "If it persists above 100.4°F (38°C) for more than 2 days, or if you experience severe symptoms, "
-                   "please consult a doctor.\n\n"
+        # Appointments
+        if any(word in message_lower for word in ["appointment", "book", "schedule", "visit", "consultation"]):
+            return ("I can help you with appointments! You have a few options:\n\n"
+                   "📅 **Online Booking**: Log in to your Patient Portal and go to the Appointments section\n"
+                   "📞 **Call Us**: +1 (555) 123-4567 (Mon-Sat, 8AM-8PM)\n"
+                   "🏥 **Walk-in**: Visit our reception desk\n\n"
+                   "Our doctors are available across multiple specialties. Would you like to know about our departments?\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
-        if any(word in message_lower for word in ["headache", "head pain"]):
-            return ("Headaches can have various causes including stress, dehydration, or lack of sleep. "
-                   "Rest, hydration, and over-the-counter pain relievers may help. If headaches are severe, "
-                   "persistent, or accompanied by other symptoms, please consult a doctor.\n\n"
+        # Fever
+        if any(word in message_lower for word in ["fever", "temperature", "hot", "burning"]):
+            return ("Fever is your body's natural response to infection or illness. Here's what you can do:\n\n"
+                   "🌡️ **Monitor**: Check temperature regularly (normal is 98.6°F / 37°C)\n"
+                   "💧 **Stay Hydrated**: Drink plenty of water and fluids\n"
+                   "😴 **Rest**: Get adequate sleep\n"
+                   "💊 **Medication**: Over-the-counter fever reducers may help\n\n"
+                   "⚠️ **See a doctor if**:\n"
+                   "• Fever above 103°F (39.4°C)\n"
+                   "• Lasts more than 3 days\n"
+                   "• Accompanied by severe symptoms\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
-        if any(word in message_lower for word in ["medicine", "medication", "prescription"]):
-            return ("For information about your prescribed medications, please consult with your doctor or pharmacist. "
-                   "You can also check your prescription details in the Patient Portal under 'Prescriptions'.\n\n"
+        # Cold/Cough
+        if any(word in message_lower for word in ["cold", "cough", "sneeze", "runny nose", "congestion"]):
+            return ("Common cold symptoms usually improve within 7-10 days. Here's how to feel better:\n\n"
+                   "💧 **Hydration**: Drink warm fluids like tea, soup, or warm water\n"
+                   "😴 **Rest**: Your body needs energy to fight the infection\n"
+                   "🍯 **Honey**: Can help soothe throat irritation\n"
+                   "🧴 **Humidifier**: Helps with congestion\n\n"
+                   "⚠️ **Consult a doctor if**:\n"
+                   "• Symptoms worsen after 7 days\n"
+                   "• High fever develops\n"
+                   "• Difficulty breathing\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
-        if any(word in message_lower for word in ["test", "result", "lab", "report"]):
-            return ("Your test results will be available in the Patient Portal once they're ready. "
-                   "Your doctor will review them and discuss the findings with you during your follow-up appointment.\n\n"
+        # Headache
+        if any(word in message_lower for word in ["headache", "head pain", "migraine"]):
+            return ("Headaches can have various causes. Here are some tips:\n\n"
+                   "💧 **Hydrate**: Dehydration is a common cause\n"
+                   "😴 **Rest**: In a quiet, dark room\n"
+                   "🧊 **Cold/Warm Compress**: Apply to forehead or neck\n"
+                   "💊 **Pain Relief**: Over-the-counter medications may help\n\n"
+                   "⚠️ **Seek immediate help if**:\n"
+                   "• Sudden, severe headache\n"
+                   "• With fever, stiff neck, or confusion\n"
+                   "• After head injury\n"
+                   "• Vision changes or difficulty speaking\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
-        # Default fallback
-        return ("I'm currently experiencing technical difficulties and cannot provide detailed health guidance at the moment. "
-               "For medical concerns, please:\n"
-               "• Contact your doctor directly\n"
-               "• Call our helpline: +1 (555) 123-4567\n"
-               "• Visit our emergency department for urgent matters\n\n"
+        # Stomach/Digestive
+        if any(word in message_lower for word in ["stomach", "pain", "nausea", "vomit", "diarrhea", "constipation"]):
+            return ("Digestive issues are common. Here's general guidance:\n\n"
+                   "💧 **Stay Hydrated**: Especially important with vomiting/diarrhea\n"
+                   "🍚 **Bland Diet**: Rice, bananas, toast, applesauce\n"
+                   "😴 **Rest**: Let your digestive system recover\n"
+                   "🚫 **Avoid**: Spicy, fatty, or dairy foods temporarily\n\n"
+                   "⚠️ **See a doctor if**:\n"
+                   "• Severe or persistent pain\n"
+                   "• Blood in stool or vomit\n"
+                   "• Signs of dehydration\n"
+                   "• Symptoms last more than 2 days\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Medicine/Medication
+        if any(word in message_lower for word in ["medicine", "medication", "prescription", "drug", "pill"]):
+            return ("For medication information:\n\n"
+                   "💊 **Your Prescriptions**: Check the Patient Portal under 'Prescriptions'\n"
+                   "👨‍⚕️ **Doctor's Advice**: Always follow your doctor's instructions\n"
+                   "💬 **Pharmacist**: Our pharmacy team can answer questions\n"
+                   "📞 **Call**: +1 (555) 123-4567 for medication queries\n\n"
+                   "⚠️ **Important**:\n"
+                   "• Never share medications\n"
+                   "• Complete the full course as prescribed\n"
+                   "• Report any side effects to your doctor\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Test Results
+        if any(word in message_lower for word in ["test", "result", "lab", "report", "blood work"]):
+            return ("Your test results:\n\n"
+                   "📱 **Patient Portal**: Results are posted here when ready\n"
+                   "👨‍⚕️ **Doctor Review**: Your doctor will discuss results with you\n"
+                   "📞 **Questions**: Call +1 (555) 123-4567\n"
+                   "⏰ **Timing**: Most results available within 24-48 hours\n\n"
+                   "Your doctor will contact you if any urgent findings need discussion.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Emergency
+        if any(word in message_lower for word in ["emergency", "urgent", "serious", "911"]):
+            return ("🚨 **For Medical Emergencies**:\n\n"
+                   "📞 **Call Emergency Services**: 911 or your local emergency number\n"
+                   "🏥 **Our Emergency Dept**: Open 24/7 at +1 (555) 911-0000\n\n"
+                   "**Go to ER immediately for**:\n"
+                   "• Chest pain or pressure\n"
+                   "• Difficulty breathing\n"
+                   "• Severe bleeding\n"
+                   "• Loss of consciousness\n"
+                   "• Severe allergic reaction\n\n"
+                   "Don't wait - seek immediate help!\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Healthy Living
+        if any(word in message_lower for word in ["healthy", "wellness", "fitness", "diet", "exercise"]):
+            return ("Great that you're thinking about your health! Here are some tips:\n\n"
+                   "🏃 **Exercise**: 30 minutes daily, 5 days a week\n"
+                   "🥗 **Nutrition**: Balanced diet with fruits, vegetables, whole grains\n"
+                   "💧 **Hydration**: 8 glasses of water daily\n"
+                   "😴 **Sleep**: 7-9 hours per night\n"
+                   "🧘 **Stress Management**: Meditation, yoga, or hobbies\n\n"
+                   "Our wellness programs can help! Contact us to learn more.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Doctors/Specialists
+        if any(word in message_lower for word in ["doctor", "specialist", "physician", "cardiologist", "neurologist"]):
+            return ("We have expert specialists across multiple departments:\n\n"
+                   "❤️ **Cardiology** - Heart specialists\n"
+                   "🧠 **Neurology** - Brain and nervous system\n"
+                   "👶 **Pediatrics** - Children's health\n"
+                   "🦴 **Orthopedics** - Bones and joints\n"
+                   "👁️ **Ophthalmology** - Eye care\n"
+                   "⚡ **Emergency** - 24/7 urgent care\n\n"
+                   "To book with a specialist, call +1 (555) 123-4567 or use the Patient Portal.\n\n"
+                   "This information is for general guidance only and is not a medical diagnosis.")
+        
+        # Default helpful response
+        return ("I'm here to help with general health information! I can assist you with:\n\n"
+               "📅 **Appointments** - Booking and scheduling\n"
+               "💊 **Medications** - General information\n"
+               "🏥 **Services** - Our departments and specialists\n"
+               "📋 **Test Results** - How to access them\n"
+               "🤒 **Common Symptoms** - General guidance\n\n"
+               "What would you like to know more about?\n\n"
+               "For specific medical advice, please consult with your doctor.\n\n"
                "This information is for general guidance only and is not a medical diagnosis.")
 
     async def doctor_analysis(self, age: int, gender: str, vitals: dict, history: dict, symptoms: list):
