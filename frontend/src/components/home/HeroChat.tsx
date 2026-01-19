@@ -136,7 +136,7 @@ export const HeroChat = () => {
                                             }`}>
                                             {message.sender === "user" ? <User className="h-4 w-4" /> : <img src={logo} alt="Bot" className="h-full w-full object-contain" />}
                                         </div>
-                                        <div className={`p-3 rounded-2xl text-sm ${message.sender === "user"
+                                        <div className={`p-3 rounded-2xl text-sm whitespace-pre-wrap ${message.sender === "user"
                                             ? "bg-primary text-primary-foreground rounded-tr-none"
                                             : "bg-muted/50 border border-border rounded-tl-none"
                                             }`}>
