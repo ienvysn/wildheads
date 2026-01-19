@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, FileText, Activity, Heart, LayoutDashboard, Pill, FlaskConical } from "lucide-react";
+import { Calendar, FileText, Activity, Heart, LayoutDashboard, Pill, FlaskConical, Download } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AIHealthChat } from "@/components/patient/AIHealthChat";
@@ -14,6 +15,28 @@ export default function PatientDashboard() {
   const { data: appointments, isLoading: appointmentsLoading } = useAppointments();
   const { data: prescriptions, isLoading: prescriptionsLoading } = usePrescriptions();
   const { data: testResults, isLoading: resultsLoading } = useTestResults();
+
+  const [personalRecord, setPersonalRecord] = useState<any>(null);
+
+  useEffect(() => {
+    if (user?.username) {
+      fetch(`http://localhost:5000/api/patients/${user.username}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) setPersonalRecord(data);
+        })
+        .catch(err => console.error("Error fetching patient record:", err));
+    }
+  }, [user]);
+
+  const downloadPDF = (base64Data: string, fileName: string) => {
+    const link = document.createElement("a");
+    link.href = base64Data;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const navItems = [
     { label: "Dashboard", href: "/patient/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -100,8 +123,45 @@ export default function PatientDashboard() {
               <AIHealthChat />
             </div>
 
-            {/* Quick Info */}
+            {/* Quick Info & Reports */}
             <div className="space-y-6">
+              {/* Personal Report Card */}
+              {personalRecord && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="text-primary flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Your Medical Report
+                    </CardTitle>
+                    <CardDescription>Latest report updated by the hospital</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded bg-red-50 flex items-center justify-center">
+                          <FileText className="h-6 w-6 text-red-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium truncate max-w-[120px]">{personalRecord.fileName}</p>
+                          <p className="text-[10px] text-muted-foreground">{new Date(personalRecord.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <Button size="icon" variant="ghost" onClick={() => downloadPDF(personalRecord.fileData, personalRecord.fileName)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {personalRecord.fileData && (
+                      <div className="aspect-[4/3] w-full border rounded-lg overflow-hidden bg-white">
+                        <iframe
+                          src={personalRecord.fileData}
+                          className="w-full h-full"
+                          title="Report Preview"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
               {/* Upcoming Appointments */}
               <Card>
                 <CardHeader>

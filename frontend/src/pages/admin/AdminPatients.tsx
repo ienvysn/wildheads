@@ -37,13 +37,20 @@ const AdminPatients = () => {
         symptoms: "",
     });
 
-    // Load patients from localStorage on mount
+    // Load patients from backend on mount
     useEffect(() => {
-        const saved = localStorage.getItem("hospital_patients");
-        if (saved) {
-            setPatients(JSON.parse(saved));
-        }
+        fetchPatients();
     }, []);
+
+    const fetchPatients = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/patients');
+            const data = await res.json();
+            setPatients(data);
+        } catch (error) {
+            console.error('Error fetching patients:', error);
+        }
+    };
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -66,28 +73,36 @@ const AdminPatients = () => {
         }
 
         const reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
             const base64String = reader.result as string;
             const newPid = `PID-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
             const newPatient = {
-                id: Date.now(),
                 ...formData,
                 pid: newPid,
                 fileName: uploadedFile.name,
-                fileData: base64String, // Store the actual PDF data
+                fileData: base64String,
                 createdAt: new Date().toISOString(),
             };
 
-            const updatedPatients = [newPatient, ...patients];
-            setPatients(updatedPatients);
-            localStorage.setItem("hospital_patients", JSON.stringify(updatedPatients));
-            setGeneratedId(newPid);
+            try {
+                const res = await fetch('http://localhost:5000/api/patients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPatient)
+                });
 
-            toast({
-                title: "Patient Registered",
-                description: `ID: ${newPid} | File: ${uploadedFile.name} uploaded.`,
-            });
+                if (res.ok) {
+                    await fetchPatients();
+                    setGeneratedId(newPid);
+                    toast({
+                        title: "Patient Registered",
+                        description: `ID: ${newPid} | File: ${uploadedFile.name} uploaded.`,
+                    });
+                }
+            } catch (error) {
+                console.error('Error creating patient:', error);
+            }
         };
         reader.readAsDataURL(uploadedFile);
     };
@@ -102,15 +117,22 @@ const AdminPatients = () => {
         toast({ title: "Downloading", description: "Your report is being downloaded." });
     };
 
-    const handleDeletePatient = (id: number) => {
-        const updatedPatients = patients.filter(p => p.id !== id);
-        setPatients(updatedPatients);
-        localStorage.setItem("hospital_patients", JSON.stringify(updatedPatients));
-        toast({
-            title: "Patient Deleted",
-            description: "The patient record has been removed.",
-            variant: "destructive"
-        });
+    const handleDeletePatient = async (id: number) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/patients/${id}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                await fetchPatients();
+                toast({
+                    title: "Patient Deleted",
+                    description: "The patient record has been removed.",
+                    variant: "destructive"
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting patient:', error);
+        }
     };
 
     const handleEditPatient = (patient: any) => {
@@ -129,7 +151,7 @@ const AdminPatients = () => {
         setIsEditOpen(true);
     };
 
-    const handleUpdatePatient = () => {
+    const handleUpdatePatient = async () => {
         if (!formData.name || !formData.age || !formData.gender) {
             toast({
                 title: "Missing Information",
@@ -139,24 +161,25 @@ const AdminPatients = () => {
             return;
         }
 
-        const updatedPatients = patients.map(p => {
-            if (p.id === editingPatientId) {
-                return {
-                    ...p,
-                    ...formData,
-                };
-            }
-            return p;
-        });
+        try {
+            const res = await fetch(`http://localhost:5000/api/patients/${editingPatientId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
 
-        setPatients(updatedPatients);
-        localStorage.setItem("hospital_patients", JSON.stringify(updatedPatients));
-        setIsEditOpen(false);
-        setEditingPatientId(null);
-        toast({
-            title: "Patient Updated",
-            description: `Record for ${formData.name} has been updated.`,
-        });
+            if (res.ok) {
+                await fetchPatients();
+                setIsEditOpen(false);
+                setEditingPatientId(null);
+                toast({
+                    title: "Patient Updated",
+                    description: `Record for ${formData.name} has been updated.`,
+                });
+            }
+        } catch (error) {
+            console.error('Error updating patient:', error);
+        }
     };
 
     const copyToClipboard = (text: string) => {
