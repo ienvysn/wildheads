@@ -30,7 +30,6 @@ export const Header = () => {
     const roleRoutes: Record<string, string> = {
       admin: "/admin/dashboard",
       doctor: "/doctor/dashboard",
-      nurse: "/nurse/dashboard",
       patient: "/patient/dashboard",
     };
     return roleRoutes[user.role] || "/";
@@ -136,9 +135,9 @@ export const Header = () => {
           ) : (
             <>
               <Button variant="ghost" className="text-foreground" onClick={() => navigate("/login")}>
-                Staff Login
+                Login
               </Button>
-              <Button onClick={() => navigate("/contact")}>Contact Reception</Button>
+              <Button onClick={() => navigate("/register")}>Join Arogya</Button>
             </>
           )}
         </div>
@@ -243,7 +242,7 @@ export const Header = () => {
                       setIsMenuOpen(false);
                     }}
                   >
-                    Staff Login
+                    Login
                   </Button>
                   <Button
                     onClick={() => {
@@ -251,7 +250,7 @@ export const Header = () => {
                       setIsMenuOpen(false);
                     }}
                   >
-                    Patient Portal
+                    Join Arogya
                   </Button>
                 </div>
               )}
