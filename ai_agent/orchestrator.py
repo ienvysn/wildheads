@@ -111,11 +111,11 @@ class AIOrchestrator:
         # 1. Critical Emergency Keywords (Immediate Alert)
         critical_emergency = ["suicide", "kill myself", "end my life", "want to die"]
         if any(k in user_message.lower() for k in critical_emergency):
-            return ("🚨 **Immediate Help Available**\n\n"
+            return ("🚨 IMMEDIATE HELP AVAILABLE\n\n"
                    "If you're experiencing a mental health crisis:\n"
-                   "• **National Suicide Prevention Lifeline**: 988 (24/7)\n"
-                   "• **Crisis Text Line**: Text HOME to 741741\n"
-                   "• **Emergency Services**: 911\n\n"
+                   "• National Suicide Prevention Lifeline: 988 (24/7)\n"
+                   "• Crisis Text Line: Text HOME to 741741\n"
+                   "• Emergency Services: 911\n\n"
                    "You don't have to face this alone. Please reach out for help right now.\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
@@ -127,10 +127,10 @@ class AIOrchestrator:
         ]
         if any(condition in user_message.lower() for condition in serious_conditions):
             return ("I understand you have serious health concerns. These are important medical matters that require professional evaluation.\n\n"
-                   "**What I recommend:**\n"
-                   "• **Speak with your doctor** - They can provide proper assessment and guidance\n"
-                   "• **Schedule an appointment** - Call us at +1 (555) 123-4567\n"
-                   "• **Emergency symptoms?** - Visit our ER or call 911\n\n"
+                   "What I recommend:\n"
+                   "• Speak with your doctor - They can provide proper assessment and guidance\n"
+                   "• Schedule an appointment - Call us at +1 (555) 123-4567\n"
+                   "• Emergency symptoms? Visit our ER or call 911\n\n"
                    "I'm not able to assess or diagnose serious medical conditions, but our medical team is here to help you. "
                    "Please don't hesitate to reach out to them directly.\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
@@ -144,21 +144,21 @@ class AIOrchestrator:
             # Check if asking about serious condition
             if any(word in user_message.lower() for word in ["cancer", "tumor", "disease", "condition", "illness"]):
                 return ("I understand you're concerned about your symptoms. However, I'm not able to provide diagnoses or confirm/rule out medical conditions.\n\n"
-                       "**Here's what you should do:**\n"
-                       "• **Consult your doctor** - They can properly evaluate your symptoms\n"
-                       "• **Book an appointment** - Call +1 (555) 123-4567 or use the Patient Portal\n"
-                       "• **Urgent symptoms?** - Visit our emergency department\n\n"
+                       "Here's what you should do:\n"
+                       "• Consult your doctor - They can properly evaluate your symptoms\n"
+                       "• Book an appointment - Call +1 (555) 123-4567 or use the Patient Portal\n"
+                       "• Urgent symptoms? Visit our emergency department\n\n"
                        "Your health concerns deserve professional medical attention. Our doctors are here to help.\n\n"
                        "This information is for general guidance only and is not a medical diagnosis.")
         
         # 4. Chest Pain or Severe Symptoms (Emergency)
         emergency_symptoms = ["chest pain", "can't breathe", "difficulty breathing", "severe bleeding", "unconscious"]
         if any(symptom in user_message.lower() for symptom in emergency_symptoms):
-            return ("🚨 **This may be a medical emergency!**\n\n"
-                   "**Take immediate action:**\n"
-                   "• **Call 911** or your local emergency number NOW\n"
-                   "• **Go to the nearest ER** - Don't drive yourself\n"
-                   "• **Our Emergency Dept**: +1 (555) 911-0000 (24/7)\n\n"
+            return ("🚨 THIS MAY BE A MEDICAL EMERGENCY!\n\n"
+                   "Take immediate action:\n"
+                   "• Call 911 or your local emergency number NOW\n"
+                   "• Go to the nearest ER - Don't drive yourself\n"
+                   "• Our Emergency Dept: +1 (555) 911-0000 (24/7)\n\n"
                    "Don't wait - seek emergency care immediately!\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
@@ -204,20 +204,20 @@ class AIOrchestrator:
         # Appointments
         if any(word in message_lower for word in ["appointment", "book", "schedule", "visit", "consultation"]):
             return ("I can help you with appointments! You have a few options:\n\n"
-                   "📅 **Online Booking**: Log in to your Patient Portal and go to the Appointments section\n"
-                   "📞 **Call Us**: +1 (555) 123-4567 (Mon-Sat, 8AM-8PM)\n"
-                   "🏥 **Walk-in**: Visit our reception desk\n\n"
+                   "📅 Online Booking: Log in to your Patient Portal and go to the Appointments section\n"
+                   "📞 Call Us: +1 (555) 123-4567 (Mon-Sat, 8AM-8PM)\n"
+                   "🏥 Walk-in: Visit our reception desk\n\n"
                    "Our doctors are available across multiple specialties. Would you like to know about our departments?\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
         # Fever
         if any(word in message_lower for word in ["fever", "temperature", "hot", "burning"]):
             return ("Fever is your body's natural response to infection or illness. Here's what you can do:\n\n"
-                   "🌡️ **Monitor**: Check temperature regularly (normal is 98.6°F / 37°C)\n"
-                   "💧 **Stay Hydrated**: Drink plenty of water and fluids\n"
-                   "😴 **Rest**: Get adequate sleep\n"
-                   "💊 **Medication**: Over-the-counter fever reducers may help\n\n"
-                   "⚠️ **See a doctor if**:\n"
+                   "🌡️ Monitor: Check temperature regularly (normal is 98.6°F / 37°C)\n"
+                   "💧 Stay Hydrated: Drink plenty of water and fluids\n"
+                   "😴 Rest: Get adequate sleep\n"
+                   "💊 Medication: Over-the-counter fever reducers may help\n\n"
+                   "⚠️ See a doctor if:\n"
                    "• Fever above 103°F (39.4°C)\n"
                    "• Lasts more than 3 days\n"
                    "• Accompanied by severe symptoms\n\n"
@@ -226,11 +226,11 @@ class AIOrchestrator:
         # Cold/Cough
         if any(word in message_lower for word in ["cold", "cough", "sneeze", "runny nose", "congestion"]):
             return ("Common cold symptoms usually improve within 7-10 days. Here's how to feel better:\n\n"
-                   "💧 **Hydration**: Drink warm fluids like tea, soup, or warm water\n"
-                   "😴 **Rest**: Your body needs energy to fight the infection\n"
-                   "🍯 **Honey**: Can help soothe throat irritation\n"
-                   "🧴 **Humidifier**: Helps with congestion\n\n"
-                   "⚠️ **Consult a doctor if**:\n"
+                   "💧 Hydration: Drink warm fluids like tea, soup, or warm water\n"
+                   "😴 Rest: Your body needs energy to fight the infection\n"
+                   "🍯 Honey: Can help soothe throat irritation\n"
+                   "🧴 Humidifier: Helps with congestion\n\n"
+                   "⚠️ Consult a doctor if:\n"
                    "• Symptoms worsen after 7 days\n"
                    "• High fever develops\n"
                    "• Difficulty breathing\n\n"
@@ -239,11 +239,11 @@ class AIOrchestrator:
         # Headache
         if any(word in message_lower for word in ["headache", "head pain", "migraine"]):
             return ("Headaches can have various causes. Here are some tips:\n\n"
-                   "💧 **Hydrate**: Dehydration is a common cause\n"
-                   "😴 **Rest**: In a quiet, dark room\n"
-                   "🧊 **Cold/Warm Compress**: Apply to forehead or neck\n"
-                   "💊 **Pain Relief**: Over-the-counter medications may help\n\n"
-                   "⚠️ **Seek immediate help if**:\n"
+                   "💧 Hydrate: Dehydration is a common cause\n"
+                   "😴 Rest: In a quiet, dark room\n"
+                   "🧊 Cold/Warm Compress: Apply to forehead or neck\n"
+                   "💊 Pain Relief: Over-the-counter medications may help\n\n"
+                   "⚠️ Seek immediate help if:\n"
                    "• Sudden, severe headache\n"
                    "• With fever, stiff neck, or confusion\n"
                    "• After head injury\n"
@@ -253,11 +253,11 @@ class AIOrchestrator:
         # Stomach/Digestive
         if any(word in message_lower for word in ["stomach", "pain", "nausea", "vomit", "diarrhea", "constipation"]):
             return ("Digestive issues are common. Here's general guidance:\n\n"
-                   "💧 **Stay Hydrated**: Especially important with vomiting/diarrhea\n"
-                   "🍚 **Bland Diet**: Rice, bananas, toast, applesauce\n"
-                   "😴 **Rest**: Let your digestive system recover\n"
-                   "🚫 **Avoid**: Spicy, fatty, or dairy foods temporarily\n\n"
-                   "⚠️ **See a doctor if**:\n"
+                   "💧 Stay Hydrated: Especially important with vomiting/diarrhea\n"
+                   "🍚 Bland Diet: Rice, bananas, toast, applesauce\n"
+                   "😴 Rest: Let your digestive system recover\n"
+                   "🚫 Avoid: Spicy, fatty, or dairy foods temporarily\n\n"
+                   "⚠️ See a doctor if:\n"
                    "• Severe or persistent pain\n"
                    "• Blood in stool or vomit\n"
                    "• Signs of dehydration\n"
@@ -267,11 +267,11 @@ class AIOrchestrator:
         # Medicine/Medication
         if any(word in message_lower for word in ["medicine", "medication", "prescription", "drug", "pill"]):
             return ("For medication information:\n\n"
-                   "💊 **Your Prescriptions**: Check the Patient Portal under 'Prescriptions'\n"
-                   "👨‍⚕️ **Doctor's Advice**: Always follow your doctor's instructions\n"
-                   "💬 **Pharmacist**: Our pharmacy team can answer questions\n"
-                   "📞 **Call**: +1 (555) 123-4567 for medication queries\n\n"
-                   "⚠️ **Important**:\n"
+                   "💊 Your Prescriptions: Check the Patient Portal under 'Prescriptions'\n"
+                   "👨‍⚕️ Doctor's Advice: Always follow your doctor's instructions\n"
+                   "💬 Pharmacist: Our pharmacy team can answer questions\n"
+                   "📞 Call: +1 (555) 123-4567 for medication queries\n\n"
+                   "⚠️ Important:\n"
                    "• Never share medications\n"
                    "• Complete the full course as prescribed\n"
                    "• Report any side effects to your doctor\n\n"
@@ -280,19 +280,19 @@ class AIOrchestrator:
         # Test Results
         if any(word in message_lower for word in ["test", "result", "lab", "report", "blood work"]):
             return ("Your test results:\n\n"
-                   "📱 **Patient Portal**: Results are posted here when ready\n"
-                   "👨‍⚕️ **Doctor Review**: Your doctor will discuss results with you\n"
-                   "📞 **Questions**: Call +1 (555) 123-4567\n"
-                   "⏰ **Timing**: Most results available within 24-48 hours\n\n"
+                   "📱 Patient Portal: Results are posted here when ready\n"
+                   "👨‍⚕️ Doctor Review: Your doctor will discuss results with you\n"
+                   "📞 Questions: Call +1 (555) 123-4567\n"
+                   "⏰ Timing: Most results available within 24-48 hours\n\n"
                    "Your doctor will contact you if any urgent findings need discussion.\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
         # Emergency
         if any(word in message_lower for word in ["emergency", "urgent", "serious", "911"]):
-            return ("🚨 **For Medical Emergencies**:\n\n"
-                   "📞 **Call Emergency Services**: 911 or your local emergency number\n"
-                   "🏥 **Our Emergency Dept**: Open 24/7 at +1 (555) 911-0000\n\n"
-                   "**Go to ER immediately for**:\n"
+            return ("🚨 For Medical Emergencies:\n\n"
+                   "📞 Call Emergency Services: 911 or your local emergency number\n"
+                   "🏥 Our Emergency Dept: Open 24/7 at +1 (555) 911-0000\n\n"
+                   "Go to ER immediately for:\n"
                    "• Chest pain or pressure\n"
                    "• Difficulty breathing\n"
                    "• Severe bleeding\n"
@@ -304,33 +304,33 @@ class AIOrchestrator:
         # Healthy Living
         if any(word in message_lower for word in ["healthy", "wellness", "fitness", "diet", "exercise"]):
             return ("Great that you're thinking about your health! Here are some tips:\n\n"
-                   "🏃 **Exercise**: 30 minutes daily, 5 days a week\n"
-                   "🥗 **Nutrition**: Balanced diet with fruits, vegetables, whole grains\n"
-                   "💧 **Hydration**: 8 glasses of water daily\n"
-                   "😴 **Sleep**: 7-9 hours per night\n"
-                   "🧘 **Stress Management**: Meditation, yoga, or hobbies\n\n"
+                   "🏃 Exercise: 30 minutes daily, 5 days a week\n"
+                   "🥗 Nutrition: Balanced diet with fruits, vegetables, whole grains\n"
+                   "💧 Hydration: 8 glasses of water daily\n"
+                   "😴 Sleep: 7-9 hours per night\n"
+                   "🧘 Stress Management: Meditation, yoga, or hobbies\n\n"
                    "Our wellness programs can help! Contact us to learn more.\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
         # Doctors/Specialists
         if any(word in message_lower for word in ["doctor", "specialist", "physician", "cardiologist", "neurologist"]):
             return ("We have expert specialists across multiple departments:\n\n"
-                   "❤️ **Cardiology** - Heart specialists\n"
-                   "🧠 **Neurology** - Brain and nervous system\n"
-                   "👶 **Pediatrics** - Children's health\n"
-                   "🦴 **Orthopedics** - Bones and joints\n"
-                   "👁️ **Ophthalmology** - Eye care\n"
-                   "⚡ **Emergency** - 24/7 urgent care\n\n"
+                   "❤️ Cardiology - Heart specialists\n"
+                   "🧠 Neurology - Brain and nervous system\n"
+                   "👶 Pediatrics - Children's health\n"
+                   "🦴 Orthopedics - Bones and joints\n"
+                   "👁️ Ophthalmology - Eye care\n"
+                   "⚡ Emergency - 24/7 urgent care\n\n"
                    "To book with a specialist, call +1 (555) 123-4567 or use the Patient Portal.\n\n"
                    "This information is for general guidance only and is not a medical diagnosis.")
         
         # Default helpful response
         return ("I'm here to help with general health information! I can assist you with:\n\n"
-               "📅 **Appointments** - Booking and scheduling\n"
-               "💊 **Medications** - General information\n"
-               "🏥 **Services** - Our departments and specialists\n"
-               "📋 **Test Results** - How to access them\n"
-               "🤒 **Common Symptoms** - General guidance\n\n"
+               "📅 Appointments - Booking and scheduling\n"
+               "💊 Medications - General information\n"
+               "🏥 Services - Our departments and specialists\n"
+               "📋 Test Results - How to access them\n"
+               "🤒 Common Symptoms - General guidance\n\n"
                "What would you like to know more about?\n\n"
                "For specific medical advice, please consult with your doctor.\n\n"
                "This information is for general guidance only and is not a medical diagnosis.")
