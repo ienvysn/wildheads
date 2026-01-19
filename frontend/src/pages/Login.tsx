@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ShieldCheck, Stethoscope, UserCog, User, Mail } from "lucide-react";
+import { Building2, Stethoscope, User, Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,9 +15,9 @@ import logo from "@/image/arogya.png";
 import { useAuth, UserRole } from "@/context/AuthContext";
 
 const roleConfig = {
-  admin: {
-    icon: UserCog,
-    label: "Hospital Admin",
+  admin: { // Hospital Admin
+    icon: Building2,
+    label: "Hospital",
     color: "bg-primary/10 border-primary text-primary",
     route: "/admin/dashboard"
   },
@@ -26,12 +26,6 @@ const roleConfig = {
     label: "Doctor",
     color: "bg-success/10 border-success text-success",
     route: "/doctor/dashboard"
-  },
-  nurse: {
-    icon: ShieldCheck,
-    label: "Nurse",
-    color: "bg-info/10 border-info text-info",
-    route: "/nurse/dashboard"
   },
   patient: {
     icon: User,
@@ -45,13 +39,11 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login } = useAuth();
-  const [skipAnimation, setSkipAnimation] = useState(false);
   const [role, setRole] = useState<UserRole>("patient");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,31 +60,41 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      if (role === "patient") {
+        // Check local storage for admins created patients
+        const localPatients = JSON.parse(localStorage.getItem("arogya_patients") || "[]");
+        const found = localPatients.find((p: any) => p.pid === email || p.patientId === email);
+
+        if (!found && email !== "PID-DEMO") {
+          toast({
+            title: "Invalid Patient ID",
+            description: "This ID was not found. Please contact your hospital.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Login with backend
       await login(email, password);
 
       // After successful login, get user profile to determine role
-      // The AuthContext already fetches the profile, so we can access it
-      // We'll use a small delay to ensure state is updated
       setTimeout(() => {
-        // Get the user data from localStorage or context
         const token = localStorage.getItem("access_token");
         if (token) {
-          // Fetch user profile to get actual role
           import("@/services/api").then(({ authApi }) => {
             authApi.getProfile().then((response) => {
               const userRole = response.data.role as UserRole;
-              const targetRoute = roleConfig[userRole]?.route || "/";
+              const targetRoute = roleConfig[userRole]?.route || roleConfig[role].route;
               navigate(targetRoute);
             }).catch(() => {
-              // Fallback to selected role if profile fetch fails
               navigate(roleConfig[role].route);
             });
           });
         }
       }, 200);
     } catch (error) {
-      // Error handling is done in AuthContext
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -109,12 +111,12 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="h-20 w-20 rounded-3xl bg-white flex items-center justify-center mx-auto mb-6 shadow-2xl overflow-hidden p-2">
-              <img src={logo} alt="Arogya Logo" className=" mt-3 max-h-full max-w-full object-contain" />
+            <div className="h-24 w-24 rounded-3xl bg-white flex items-center justify-center mx-auto mb-6 shadow-2xl overflow-hidden p-2">
+              <img src={logo} alt="Arogya Logo" className="mt-4 max-h-full max-w-full object-contain" />
             </div>
             <h1 className="text-4xl font-bold text-primary-foreground mb-4">Arogya</h1>
             <p className="text-primary-foreground/80 text-lg max-w-md">
-              Your trusted partner in healthcare management. Access your dashboard securely.
+              Secure healthcare management platform. Access your personalized dashboard.
             </p>
           </motion.div>
         </div>
@@ -142,17 +144,17 @@ const Login = () => {
           <Card className="border-0 shadow-lg">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-2xl">Welcome Back</CardTitle>
-              <CardDescription>Sign in to access your dashboard</CardDescription>
+              <CardDescription>Sign in to access your account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Role Selection */}
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium">Select Your Role</Label>
+                  <Label className="text-sm font-medium">I am a...</Label>
                   <RadioGroup
                     value={role}
                     onValueChange={(value) => setRole(value as UserRole)}
-                    className="grid grid-cols-2 gap-3"
+                    className="grid grid-cols-3 gap-2"
                   >
                     {(Object.keys(roleConfig) as UserRole[]).map((roleKey) => {
                       const config = roleConfig[roleKey];
@@ -163,65 +165,62 @@ const Login = () => {
                         <Label
                           key={roleKey}
                           htmlFor={roleKey}
-                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${isSelected
+                          className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected
                             ? config.color + " border-current"
-                            : "border-border hover:border-muted-foreground/30"
+                            : "border-border hover:border-muted-foreground/30 hover:bg-muted/50"
                             }`}
                         >
                           <RadioGroupItem value={roleKey} id={roleKey} className="sr-only" />
                           <Icon className="h-5 w-5" />
-                          <span className="text-sm font-medium">{config.label}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider">{config.label}</span>
                         </Label>
                       );
                     })}
                   </RadioGroup>
                 </div>
 
-                {/* Email */}
+                {/* Email / ID */}
                 <div className="space-y-2">
                   <Label>{role === "patient" ? "Patient ID" : "Email Address"}</Label>
                   <div className="relative">
                     <Input
                       type={role === "patient" ? "text" : "email"}
-                      placeholder={role === "patient" ? "PID-2026-001" : "name@arogya.com"}
+                      placeholder={role === "patient" ? "e.g. PID-2026-001" : "name@hospital.com"}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
                       disabled={isLoading}
                     />
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    {role === "patient" ? (
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    )}
                   </div>
                 </div>
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="remember"
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    />
-                    <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                      Remember me
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Button variant="link" className="px-0 h-auto text-xs text-primary">
+                      Forgot Password?
+                    </Button>
                   </div>
-                  <Button variant="link" className="px-0 text-sm text-primary">
-                    Forgot Password?
-                  </Button>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10"
+                      disabled={isLoading}
+                      required
+                    />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -238,9 +237,9 @@ const Login = () => {
 
                 {/* Register Link */}
                 <p className="text-center text-sm text-muted-foreground">
-                  New patient?{" "}
+                  Need an account?{" "}
                   <Link to="/register" className="text-primary font-medium hover:underline">
-                    Register Here
+                    Register Hospital/Doctor
                   </Link>
                 </p>
               </form>

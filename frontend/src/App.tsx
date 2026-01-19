@@ -11,8 +11,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPatients from "./pages/admin/AdminPatients";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientProfile from "./pages/doctor/PatientProfile";
-import NurseDashboard from "./pages/nurse/NurseDashboard";
-import NursePatientView from "./pages/nurse/PatientView";
+
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -60,19 +59,7 @@ const App = () => (
               }
             />
 
-            {/* Nurse Routes */}
-            <Route
-              path="/nurse/*"
-              element={
-                <ProtectedRoute allowedRoles={["nurse"]}>
-                  <Routes>
-                    <Route path="dashboard" element={<NurseDashboard />} />
-                    <Route path="patient/:id" element={<NursePatientView />} />
-                    <Route path="*" element={<NurseDashboard />} />
-                  </Routes>
-                </ProtectedRoute>
-              }
-            />
+
 
             {/* Patient Routes */}
             <Route

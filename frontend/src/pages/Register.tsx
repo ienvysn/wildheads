@@ -4,38 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, User, Mail, Lock, Phone, Calendar, MapPin } from "lucide-react";
+import { Building2, Stethoscope, Mail, Lock, Phone, User, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/ui/spinner";
 import { authApi } from "@/services/api";
-import { usePatientStore } from "@/store";
 import logo from "@/image/arogya.png";
+
+type RegisterRole = "hospital" | "doctor";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setPatientId } = usePatientStore();
+  const [role, setRole] = useState<RegisterRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedPatientId, setGeneratedPatientId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "", // Hospital Name or Doctor Full Name
     email: "",
     phone: "",
-    dateOfBirth: "",
-    address: "",
     password: "",
     confirmPassword: "",
+    hospitalId: "", // For doctors
+    licenseNumber: "", // For doctors
   });
-
-  // Generate Patient ID
-  const generatePatientId = () => {
-    const year = new Date().getFullYear();
-    const random = Math.floor(100000 + Math.random() * 900000);
-    return `PID-${year}-${random}`;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -47,8 +39,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+    if (!formData.name || !formData.email || !formData.password) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -66,51 +57,34 @@ const Register = () => {
       return;
     }
 
-    if (formData.password.length < 8) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 8 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Generate Patient ID
-      const patientId = generatePatientId();
-      setGeneratedPatientId(patientId);
-      setPatientId(patientId);
+      // Mapping roles for backend: 
+      // hospital -> admin (in our current schema) or we keep it as hospital if backend supports it
+      const backendRole = role === "hospital" ? "admin" : "doctor";
 
-      // Register user
-      const response = await authApi.register({
-        username: formData.email.split('@')[0], // Use email prefix as username
+      await authApi.register({
+        username: formData.email.split('@')[0],
         email: formData.email,
         password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        role: "patient",
-        patient_id: patientId,
+        first_name: role === "hospital" ? formData.name : formData.name.split(' ')[0],
+        last_name: role === "hospital" ? "" : (formData.name.split(' ')[1] || ""),
+        role: backendRole,
         phone: formData.phone,
-        date_of_birth: formData.dateOfBirth,
-        address: formData.address,
       });
 
       toast({
         title: "Registration Successful!",
-        description: `Your Patient ID is: ${patientId}. Please save it for future reference.`,
+        description: "Your account has been created. Please login to continue.",
       });
 
-      // Show success modal with Patient ID
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+      navigate("/login");
     } catch (error: any) {
       console.error("Registration failed:", error);
       toast({
         title: "Registration Failed",
-        description: error.response?.data?.detail || error.response?.data?.email?.[0] || "Please try again.",
+        description: error.response?.data?.detail || "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -128,8 +102,8 @@ const Register = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="h-24 w-24 rounded-3xl bg-white flex items-center justify-center mx-auto mb-8 shadow-2xl overflow-hidden">
-              <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain object-center scale-125" />
+            <div className="h-24 w-24 rounded-3xl bg-white flex items-center justify-center mx-auto mb-8 shadow-2xl overflow-hidden p-2">
+              <img src={logo} alt="Arogya Logo" className="mt-3 h-full w-full object-contain" />
             </div>
           </motion.div>
           <motion.div
@@ -139,7 +113,7 @@ const Register = () => {
           >
             <h1 className="text-4xl font-bold mb-4">Join Arogya Service</h1>
             <p className="text-lg opacity-90">
-              Connect with the best healthcare ecosystem. Whether you are a patient seeking care, a doctor offering expertise, or a hospital managing operations.
+              Connect with the ultimate healthcare ecosystem. {role === 'doctor' ? "Join as an expert to provide care." : "Join as a hospital to manage operations."}
             </p>
           </motion.div>
         </div>
@@ -149,207 +123,212 @@ const Register = () => {
 
       {/* Right Form Area */}
       <div className="flex items-center justify-center p-6 bg-background overflow-y-auto">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="lg:hidden flex items-center gap-2 justify-center mb-8">
-            <div className="h-16 w-16 flex items-center justify-center overflow-hidden">
-              <img src={logo} alt="Arogya Logo" className="h-full w-full object-contain" />
-            </div>
-            <span className="text-2xl font-bold">Aarogya</span>
-          </div>
+        <div className="w-full max-w-md">
+          <AnimatePresence mode="wait">
+            {!role ? (
+              <motion.div
+                key="role-selection"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold tracking-tight">Create an Account</h2>
+                  <p className="text-muted-foreground mt-2">Select your role to get started</p>
+                </div>
 
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">Patient Registration</CardTitle>
-              <CardDescription>Create your account to get started</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {generatedPatientId && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm font-medium text-green-800">
-                    Your Patient ID: <span className="font-bold">{generatedPatientId}</span>
+                <div className="grid gap-4">
+                  <Card
+                    className="cursor-pointer hover:border-primary transition-all hover:bg-primary/5 group"
+                    onClick={() => setRole("hospital")}
+                  >
+                    <CardHeader className="flex flex-row items-center gap-4 py-4">
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Building2 className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Hospital</CardTitle>
+                        <CardDescription>Register your medical facility</CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+
+                  <Card
+                    className="cursor-pointer hover:border-success transition-all hover:bg-success/5 group"
+                    onClick={() => setRole("doctor")}
+                  >
+                    <CardHeader className="flex flex-row items-center gap-4 py-4">
+                      <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success group-hover:text-white transition-colors">
+                        <Stethoscope className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Doctor</CardTitle>
+                        <CardDescription>Join as a healthcare professional</CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Looking for patient login? <br />
+                    <span className="text-primary font-medium">Patients are registered by hospitals only.</span>
                   </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    Please save this ID for future reference
+                  <p className="text-sm">
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-primary font-medium hover:underline">Login</Link>
                   </p>
                 </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Name */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
-                    <div className="relative">
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        placeholder="John"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className="pl-10"
-                        required
-                        disabled={isLoading}
-                      />
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <div className="relative">
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="pl-10"
-                      required
-                      disabled={isLoading}
-                    />
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Phone */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Date of Birth */}
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <div className="relative">
-                    <Input
-                      id="dateOfBirth"
-                      name="dateOfBirth"
-                      type="date"
-                      value={formData.dateOfBirth}
-                      onChange={handleChange}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Address */}
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <div className="relative">
-                    <Input
-                      id="address"
-                      name="address"
-                      placeholder="123 Main St, City, State"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="pl-10"
-                      disabled={isLoading}
-                    />
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password *</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="At least 8 characters"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="pl-10"
-                      required
-                      disabled={isLoading}
-                    />
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Re-enter password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="pl-10"
-                      required
-                      disabled={isLoading}
-                    />
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Spinner size="sm" className="mr-2" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Register"
-                  )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="registration-form"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <Button
+                  variant="ghost"
+                  onClick={() => setRole(null)}
+                  className="mb-4 -ml-2 text-muted-foreground hover:text-foreground"
+                >
+                  ← Change Role
                 </Button>
 
-                {/* Login Link */}
-                <p className="text-center text-sm text-muted-foreground">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-primary font-medium hover:underline">
-                    Login Here
-                  </Link>
-                </p>
-              </form>
-            </CardContent>
-          </Card>
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="text-center pb-2">
+                    <CardTitle className="text-2xl">
+                      {role === "hospital" ? "Hospital Registration" : "Doctor Registration"}
+                    </CardTitle>
+                    <CardDescription>Fill in your details to create an account</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">
+                          {role === "hospital" ? "Hospital Name *" : "Full Name *"}
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="name"
+                            name="name"
+                            placeholder={role === "hospital" ? "City General Hospital" : "Dr. John Doe"}
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="pl-10"
+                            required
+                            disabled={isLoading}
+                          />
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            <Link to="/" className="hover:text-foreground transition-colors">
-              ← Back to Home
-            </Link>
-          </p>
-        </motion.div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address *</Label>
+                        <div className="relative">
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="contact@example.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="pl-10"
+                            required
+                            disabled={isLoading}
+                          />
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <div className="relative">
+                          <Input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            placeholder="+1 (555) 123-4567"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            className="pl-10"
+                            disabled={isLoading}
+                          />
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+
+                      {role === "doctor" && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="licenseNumber">Medical License Number *</Label>
+                            <Input
+                              id="licenseNumber"
+                              name="licenseNumber"
+                              placeholder="MD-12345678"
+                              value={formData.licenseNumber}
+                              onChange={handleChange}
+                              required
+                              disabled={isLoading}
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password *</Label>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Min. 8 characters"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className="pl-10"
+                            required
+                            disabled={isLoading}
+                          />
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                        <div className="relative">
+                          <Input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type="password"
+                            placeholder="Re-enter password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            className="pl-10"
+                            required
+                            disabled={isLoading}
+                          />
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+
+                      <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Spinner size="sm" className="mr-2" />
+                            Creating Account...
+                          </>
+                        ) : (
+                          "Register"
+                        )}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
